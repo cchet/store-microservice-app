@@ -1,0 +1,21 @@
+version: '3.1'
+
+services:
+  warehouse-db:
+    image: postgres:bullseye
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: warehouse
+      POSTGRES_PASSWORD: warehouse
+      POSTGRES_DB: warehouse
+  order-db:
+    image: postgres:bullseye
+    restart: always
+    ports:
+      - 5433:5432
+    environment:
+      POSTGRES_USER: order
+      POSTGRES_PASSWORD: order
+      POSTGRES_DB: order
