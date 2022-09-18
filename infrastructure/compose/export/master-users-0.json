@@ -1,0 +1,46 @@
+{
+  "realm" : "master",
+  "users" : [ {
+    "id" : "6b1ba93c-aea1-4de2-b41c-e85499375327",
+    "createdTimestamp" : 1663501948279,
+    "username" : "customer",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : true,
+    "firstName" : "customer",
+    "lastName" : "customer",
+    "email" : "herzog.thomas81@gmail.com",
+    "credentials" : [ {
+      "id" : "6f9fae79-fd09-4148-a4cd-754cdb784cfc",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1663501966673,
+      "secretData" : "{\"value\":\"avXNTgK0e+1pGcaczkUw0UePLVtDjcc2haRh/L2hzOvEWP2qRiRa7gBeUZif2J5VHjkcUUUHWQUhM0+qR1UWtA==\",\"salt\":\"G3geDhBH6IuQu335ouZtSg==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "customer", "default-roles-master" ],
+    "notBefore" : 0,
+    "groups" : [ "/customer" ]
+  }, {
+    "id" : "b696fe1d-69b5-4ce6-bbbf-a3ced44b4942",
+    "createdTimestamp" : 1663490179517,
+    "username" : "keycloak",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : false,
+    "credentials" : [ {
+      "id" : "94e77187-5515-4c82-b428-0ddaf5e860b6",
+      "type" : "password",
+      "createdDate" : 1663490179611,
+      "secretData" : "{\"value\":\"WTYf2ptNapXhW/gj2UegQwHG08DpSPO2PkQC5kmKZ/TFddKzBM/2CKPDgwprhD5SQH1JVC6Mz3vpLxVixMXLDA==\",\"salt\":\"WzJRXzL5sJln16hdCRh29g==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "admin", "default-roles-master" ],
+    "notBefore" : 0,
+    "groups" : [ ]
+  } ]
+}

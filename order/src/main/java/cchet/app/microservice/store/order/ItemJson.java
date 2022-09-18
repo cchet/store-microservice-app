@@ -5,17 +5,20 @@ import java.math.BigDecimal;
 import javax.json.bind.annotation.JsonbCreator;
 import javax.json.bind.annotation.JsonbNumberFormat;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import cchet.app.microservice.store.order.domain.Item;
 
 public class ItemJson {
     
+    @NotNull
     @Size(min = 7, max = 7)
     public String productId;
 
+    @NotNull
     @Min(1)
-    public int count;
+    public Integer count;
 
     @JsonbNumberFormat(value = "#0.00", locale = "en")
     public BigDecimal price;
@@ -24,7 +27,7 @@ public class ItemJson {
     public BigDecimal rabat;
 
     
-    public ItemJson(@Size(min = 7, max = 7) String productId, @Min(1) int count) {
+    private ItemJson(String productId, Integer count) {
         this.productId = productId;
         this.count = count;
     }

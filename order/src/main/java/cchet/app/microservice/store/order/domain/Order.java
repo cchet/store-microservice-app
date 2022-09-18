@@ -8,6 +8,8 @@ import java.util.UUID;
 
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.PostUpdate;
@@ -37,13 +39,18 @@ public class Order extends PanacheEntityBase {
     @NotNull
     public LocalDateTime updatedDate;
 
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    public OrderState state;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @Valid
     @Size(min = 1, max = 10)
     public List<Item> items;
 
-    public static Order of(final String username, final List<Item> items) {
+    public static Order placedOrder(final String username, final List<Item> items) {
         final Order order = new Order();
+        order.state = OrderState.PLACED;
         order.username = Objects.requireNonNull(username, "Username must be given");
         order.items = new ArrayList<>(items);
 

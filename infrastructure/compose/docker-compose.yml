@@ -19,3 +19,26 @@ services:
       POSTGRES_USER: order
       POSTGRES_PASSWORD: order
       POSTGRES_DB: order
+  sso-db:
+    image: postgres:bullseye
+    restart: always
+    environment:
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+      POSTGRES_DB: keycloak
+  sso:
+    image: quay.io/keycloak/keycloak:19.0.2
+    restart: always
+    ports:
+      - 9080:8080
+    environment:
+      KEYCLOAK_ADMIN: keycloak
+      KEYCLOAK_ADMIN_PASSWORD: keycloak
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://sso-db:5432/keycloak
+      KC_DB_USER: keycloak
+      KC_DB_PASSWORD: keycloak
+    command: ["start-dev"]
+    depends_on:
+      - sso-db
+    
