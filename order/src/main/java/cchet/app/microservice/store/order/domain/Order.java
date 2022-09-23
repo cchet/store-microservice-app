@@ -3,7 +3,9 @@ package cchet.app.microservice.store.order.domain;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.persistence.ElementCollection;
@@ -20,6 +22,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+import io.quarkus.panache.common.Sort;
 
 @Table(name = "Orders")
 @Entity
@@ -56,7 +59,19 @@ public class Order extends PanacheEntityBase {
 
         return order;
     }
-    
+
+    public static List<Order> listForUser(final String user) {
+        return find("username = :username", Sort.descending("updatedDate", "id"), Map.of("username", user)).list();
+    }
+
+    public static Optional<Order> findPlacedOrderForId(final String id) {
+        return find("id = :id and state = :state", Map.of("id", id, "state", OrderState.PLACED)).firstResultOptional();
+    }
+
+    public void fulfill() {
+        state = OrderState.FULLFULLED;
+    }
+
     @PrePersist
     void prePersist() {
         id = UUID.randomUUID().toString();

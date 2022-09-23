@@ -5,6 +5,7 @@ import java.util.List;
 
 public class ErrorJson {
     
-    public List<String> messages = new LinkedList<>();
+    public String messages;
 
+    public List<ProductJson> invalidProducts = new LinkedList<>();
 }

@@ -18,13 +18,14 @@ import cchet.app.microservice.store.order.application.clients.WarehouseResource;
 import cchet.app.microservice.store.order.domain.Item;
 import cchet.app.microservice.store.order.domain.Order;
 import cchet.app.microservice.store.order.domain.OrderException;
+import cchet.app.microservice.store.order.domain.StaticUser;
 import cchet.app.microservice.store.order.domain.TaxCalculator;
 
 @ApplicationScoped
 @Transactional
 public class OrderCommandHandler {
 
-    private record ResolvedItems(List<Item> notExistingItems, List<Item> outOfStockItems) {
+    private record ResolvedItems(List<Item> items, List<Item> notExistingItems, List<Item> outOfStockItems) {
     }
 
     @Inject
@@ -35,17 +36,33 @@ public class OrderCommandHandler {
     WarehouseResource warehouse;
 
     public Order placeOrder(final List<Item> items) {
-        final var resolveditems = resolveInvalidAndFillValidOrderItems(items);
+        final var resolvedItems = resolveInvalidAndFillValidOrderItems(items);
 
-        if (!resolveditems.notExistingItems.isEmpty() || !resolveditems.outOfStockItems.isEmpty()) {
-            throw new OrderException("Some items are either out of stock or don't exist",
-                    resolveditems.outOfStockItems,
-                    resolveditems.notExistingItems);
+        if (!resolvedItems.notExistingItems.isEmpty() || !resolvedItems.outOfStockItems.isEmpty()) {
+            throw new OrderException("Canot place order, some items are either out of stock or don't exist",
+                    resolvedItems.outOfStockItems,
+                    resolvedItems.notExistingItems);
         }
 
         // Username should come from the security context!!
-        final Order order = Order.placedOrder("myUser", items);
+        final Order order = Order.placedOrder(StaticUser.USERNAME, items);
         order.persist();
+        return order;
+    }
+
+    public Order fulfill(final String id) {
+        final var order = Order.findPlacedOrderForId(id).orElseThrow(() -> new OrderException("Order not found"));
+        final var resolvedItems = resolveInvalidAndFillValidOrderItems(order.items);
+        if (!resolvedItems.notExistingItems.isEmpty() || !resolvedItems.outOfStockItems.isEmpty()) {
+            throw new OrderException("Canot fulfill order, some items are either out of stock or don't exist",
+                    resolvedItems.outOfStockItems,
+                    resolvedItems.notExistingItems);
+        }
+
+        order.fulfill();
+        var idtoCount = order.items.stream().collect(Collectors.toMap(i -> i.productId, i -> i.count));
+        warehouse.pull(idtoCount);
+
         return order;
     }
 
@@ -71,7 +88,7 @@ public class OrderCommandHandler {
             }
         }
 
-        return new ResolvedItems(notExistingItems, outOfStockItems);
+        return new ResolvedItems(items, notExistingItems, outOfStockItems);
     }
 
     private void calculateAndSetPrices(final Item item, final Product product) {

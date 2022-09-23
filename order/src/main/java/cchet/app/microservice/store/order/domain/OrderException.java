@@ -10,6 +10,10 @@ public class OrderException extends RuntimeException {
 
     public final List<Item> notExistingItems;
 
+    public OrderException(final String message) {
+        this(message, List.of(), List.of());
+    }
+    
     public OrderException(final String message, final List<Item> outOfStockItems, final List<Item> notExistingItems) {
         super(message);
         this.outOfStockItems = Collections.unmodifiableList(Optional.ofNullable(outOfStockItems).orElse(List.of()));

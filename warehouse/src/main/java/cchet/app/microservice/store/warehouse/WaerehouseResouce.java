@@ -1,12 +1,14 @@
 package cchet.app.microservice.store.warehouse;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -73,19 +75,17 @@ public class WaerehouseResouce {
     }
 
     @POST
-    @Path("/pull/{id}")
+    @Path("/pull")
     @Produces(MediaType.APPLICATION_JSON)
-    public ProductJson pull(@NotEmpty @PathParam("id") final String id) {
-        return commandHandler.pull(id)
-                .map(ProductJson::new)
-                .orElseThrow(() -> new NotFoundException("No Product found for id=" + id));
+    public void pull(@NotEmpty final Map<String, Integer> idWIthCount) {
+        commandHandler.pull(idWIthCount);
     }
 
     @POST
-    @Path("/push/{id}")
+    @Path("/push/{id}/{count}")
     @Produces(MediaType.APPLICATION_JSON)
-    public ProductJson push(@NotEmpty @PathParam("id") final String id) {
-        return commandHandler.push(id)
+    public ProductJson push(@NotEmpty @PathParam("id") final String id, @NotNull @Min(1) @PathParam("count") final Integer count) {
+        return commandHandler.push(id, count)
                 .map(ProductJson::new)
                 .orElseThrow(() -> new NotFoundException("No Product found for id=" + id));
     }
@@ -95,7 +95,7 @@ public class WaerehouseResouce {
         final ErrorJson errorModel = new ErrorJson();
         errorModel.messages = e.getConstraintViolations().stream()
                 .map(ConstraintViolation::getMessage)
-                .collect(Collectors.toList());
+                .collect(Collectors.joining(", "));
         return RestResponse.status(Response.Status.BAD_REQUEST, errorModel);
     }
 }
