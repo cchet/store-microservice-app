@@ -1,14 +1,12 @@
 package cchet.app.microservice.store.order.application;
 
+import java.util.List;
+
+import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.Transactional;
 
 import cchet.app.microservice.store.order.domain.Order;
 import cchet.app.microservice.store.order.domain.StaticUser;
-import io.quarkus.panache.common.Sort;
-
-import java.util.List;
-
-import javax.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 @Transactional
