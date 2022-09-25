@@ -18,8 +18,8 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 @RegisterProviders({
         @RegisterProvider(WarehouseClientResponseMapper.class)
 })
-@Path("/warehouse")
-public interface WarehouseResource {
+@Path("/product")
+public interface ProductResource {
 
     @POST
     @Path("/search/id")

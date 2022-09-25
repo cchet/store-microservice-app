@@ -9,7 +9,7 @@ import javax.inject.Inject;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import cchet.app.microservice.store.store.application.clients.ProductJson;
-import cchet.app.microservice.store.store.application.clients.WarehouseResource;
+import cchet.app.microservice.store.store.application.clients.ProductResource;
 import cchet.app.microservice.store.store.domain.Product;
 
 @ApplicationScoped
@@ -17,7 +17,7 @@ public class ProductQuery {
 
     @Inject
     @RestClient
-    WarehouseResource warehouseResource;
+    ProductResource warehouseResource;
 
     public List<Product> list() {
         return warehouseResource.list().stream()

@@ -3,3 +3,4 @@ target/
 .apt_generated_tests/
 .vscode/
 .DS_Store
+infrastructure/compose/keycloak/export/

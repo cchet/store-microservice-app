@@ -14,7 +14,7 @@ import javax.transaction.Transactional;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import cchet.app.microservice.store.order.application.clients.Product;
-import cchet.app.microservice.store.order.application.clients.WarehouseResource;
+import cchet.app.microservice.store.order.application.clients.ProductResource;
 import cchet.app.microservice.store.order.domain.Item;
 import cchet.app.microservice.store.order.domain.Order;
 import cchet.app.microservice.store.order.domain.OrderException;
@@ -33,7 +33,7 @@ public class OrderCommandHandler {
 
     @Inject
     @RestClient
-    WarehouseResource warehouse;
+    ProductResource productClient;
 
     public Order placeOrder(final List<Item> items) {
         final var resolvedItems = resolveInvalidAndFillValidOrderItems(items);
@@ -61,7 +61,7 @@ public class OrderCommandHandler {
 
         order.fulfill();
         var idtoCount = order.items.stream().collect(Collectors.toMap(i -> i.productId, i -> i.count));
-        warehouse.pull(idtoCount);
+        productClient.pull(idtoCount);
 
         return order;
     }
@@ -69,7 +69,7 @@ public class OrderCommandHandler {
     private ResolvedItems resolveInvalidAndFillValidOrderItems(final List<Item> items) {
         final var idToItem = items.stream()
                 .collect(Collectors.toMap(i -> i.productId, Function.identity()));
-        final var products = warehouse.findByIds(new ArrayList<>(idToItem.keySet()));
+        final var products = productClient.findByIds(new ArrayList<>(idToItem.keySet()));
         final var productIdToProduct = products.stream()
                 .collect(Collectors.toMap(p -> p.id, Function.identity()));
         final List<Item> notExistingItems = new LinkedList<>();

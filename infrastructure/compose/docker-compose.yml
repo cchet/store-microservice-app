@@ -38,7 +38,10 @@ services:
       KC_DB_URL: jdbc:postgresql://sso-db:5432/keycloak
       KC_DB_USER: keycloak
       KC_DB_PASSWORD: keycloak
-    command: ["start-dev"]
+    command: ["start-dev", "--import-realm"]
+    volumes:
+      - ./keycloak/import:/opt/keycloak/data/import:ro
+      - ./keycloak/export:/opt/keycloak/data/export:rw
     depends_on:
       - sso-db
     

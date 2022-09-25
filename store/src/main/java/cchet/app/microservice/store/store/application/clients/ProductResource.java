@@ -10,8 +10,8 @@ import javax.ws.rs.core.MediaType;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 @RegisterRestClient(configKey = "warehouse")
-@Path("/warehouse")
-public interface WarehouseResource {
+@Path("/product")
+public interface ProductResource {
 
     @GET
     @Path("/")

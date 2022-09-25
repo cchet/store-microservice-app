@@ -1,0 +1,28 @@
+= Store microservice application
+
+The store application is an application which consists of 3 microservices along with their corresponding databases and a sso service, for the authentication.
+
+== Keycloak
+
+Keycloak is used as the SSO service the services use for the authentication.
+
+Available users
+
+* Keycloak admin user: +
+  keycloak/keycloak
+* Store Customer user: +
+  customer/customer
+
+=== Notes
+
+When the realm is exported via the GUI then no users are exported so export the full realm via the following command which has to be executed in the directory `/opt/keycloak`
+
+.Export realm 
+[source,bash]
+----
+bin/kc.sh export --realm store --dir data/export
+----
+
+This will export the realm and users in teh project directory `infrastructure/compose/keycloak/export`.
+
+The realm and user export need to be merge, because only the realm is imported during startup and therefore we would miss the users.

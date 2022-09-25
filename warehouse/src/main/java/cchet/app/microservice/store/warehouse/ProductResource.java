@@ -29,8 +29,8 @@ import cchet.app.microservice.store.warehouse.domain.Type;
 import io.smallrye.common.constraint.NotNull;
 
 @RequestScoped
-@Path("/warehouse")
-public class WaerehouseResouce {
+@Path("/product")
+public class ProductResource {
 
     @Inject
     ProductQuery query;
