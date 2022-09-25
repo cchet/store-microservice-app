@@ -2,6 +2,7 @@ package cchet.app.microservice.store.store;
 
 import java.util.List;
 
+import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -13,11 +14,12 @@ import cchet.app.microservice.store.store.application.ProductQuery;
 import io.quarkus.oidc.IdToken;
 import io.quarkus.qute.Template;
 import io.quarkus.qute.TemplateInstance;
-import io.quarkus.security.Authenticated;
 
 @RequestScoped
 @Path("/secured")
-@Authenticated
+@RolesAllowed({
+        "customer-role"
+})
 public class SecuredController {
 
     @Inject
