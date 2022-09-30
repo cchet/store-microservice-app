@@ -14,9 +14,12 @@ import org.eclipse.microprofile.rest.client.annotation.RegisterProvider;
 import org.eclipse.microprofile.rest.client.annotation.RegisterProviders;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
+import io.quarkus.oidc.token.propagation.JsonWebTokenRequestFilter;
+
 @RegisterRestClient(configKey = "warehouse")
 @RegisterProviders({
-        @RegisterProvider(WarehouseClientResponseMapper.class)
+        @RegisterProvider(WarehouseClientResponseMapper.class),
+        @RegisterProvider(JsonWebTokenRequestFilter.class)
 })
 @Path("/product")
 public interface ProductResource {
