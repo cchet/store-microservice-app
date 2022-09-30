@@ -11,6 +11,8 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
+import org.eclipse.microprofile.jwt.Claim;
+import org.eclipse.microprofile.jwt.Claims;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import cchet.app.microservice.store.order.application.clients.Product;
@@ -18,7 +20,6 @@ import cchet.app.microservice.store.order.application.clients.ProductResource;
 import cchet.app.microservice.store.order.domain.Item;
 import cchet.app.microservice.store.order.domain.Order;
 import cchet.app.microservice.store.order.domain.OrderException;
-import cchet.app.microservice.store.order.domain.StaticUser;
 import cchet.app.microservice.store.order.domain.TaxCalculator;
 
 @ApplicationScoped
@@ -28,6 +29,10 @@ public class OrderCommandHandler {
     private record ResolvedItems(List<Item> items, List<Item> notExistingItems, List<Item> outOfStockItems) {
     }
 
+    @Inject
+    @Claim(standard =  Claims.upn)
+    String username; 
+    
     @Inject
     TaxCalculator taxCalculator;
 
@@ -45,7 +50,7 @@ public class OrderCommandHandler {
         }
 
         // Username should come from the security context!!
-        final Order order = Order.placedOrder(StaticUser.USERNAME, items);
+        final Order order = Order.placedOrder(username, items);
         order.persist();
         return order;
     }

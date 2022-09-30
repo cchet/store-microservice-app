@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.validation.ConstraintViolation;
@@ -28,13 +27,12 @@ import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 import cchet.app.microservice.store.warehouse.application.ProductCommandHandler;
 import cchet.app.microservice.store.warehouse.application.ProductQuery;
 import cchet.app.microservice.store.warehouse.domain.Type;
+import io.quarkus.security.Authenticated;
 import io.smallrye.common.constraint.NotNull;
 
 @RequestScoped
 @Path("/product")
-@RolesAllowed({
-    "customer-role"
-})
+@Authenticated
 @SecurityRequirement(name = "Keycloak")
 public class ProductResource {
 

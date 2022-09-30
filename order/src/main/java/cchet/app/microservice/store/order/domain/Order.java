@@ -1,5 +1,6 @@
 package cchet.app.microservice.store.order.domain;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -66,6 +67,10 @@ public class Order extends PanacheEntityBase {
 
     public static Optional<Order> findPlacedOrderForId(final String id) {
         return find("id = :id and state = :state", Map.of("id", id, "state", OrderState.PLACED)).firstResultOptional();
+    }
+
+    public BigDecimal fullPrice() {
+        return items.stream().map(i -> i.price).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     public void fulfill() {

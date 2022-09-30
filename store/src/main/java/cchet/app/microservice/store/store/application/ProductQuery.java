@@ -17,10 +17,10 @@ public class ProductQuery {
 
     @Inject
     @RestClient
-    ProductResource warehouseResource;
+    ProductResource warehouseClient;
 
     public List<Product> list() {
-        return warehouseResource.list().stream()
+        return warehouseClient.list().stream()
                 .map(this::toProduct)
                 .collect(Collectors.toList());
     }

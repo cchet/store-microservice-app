@@ -1,5 +1,6 @@
 package cchet.app.microservice.store.order;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -7,11 +8,13 @@ import java.util.stream.Collectors;
 import cchet.app.microservice.store.order.domain.Order;
 import cchet.app.microservice.store.order.domain.OrderState;
 
-public class OrderJson {
+public class OrderJson extends ErrorJson {
     
     public String id;
 
     public OrderState state;
+
+    public BigDecimal price;
 
     public LocalDateTime createAt;
 
@@ -24,6 +27,7 @@ public class OrderJson {
         this.createAt = order.creationDate;
         this.updatedAt = order.updatedDate;
         this.state = order.state;
+        this.price = order.fullPrice();
         this.items = order.items.stream().map(ItemJson::new).collect(Collectors.toList());
     }
 }

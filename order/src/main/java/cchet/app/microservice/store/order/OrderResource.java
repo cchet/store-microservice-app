@@ -3,7 +3,7 @@ package cchet.app.microservice.store.order;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
@@ -15,17 +15,22 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
+
 import cchet.app.microservice.store.order.application.OrderCommandHandler;
 import cchet.app.microservice.store.order.application.OrderQuery;
 import cchet.app.microservice.store.order.domain.Item;
 import cchet.app.microservice.store.order.domain.Order;
+import io.quarkus.security.Authenticated;
 
-@ApplicationScoped
+@RequestScoped
 @Path("/order")
+@Authenticated
+@SecurityRequirement(name = "Keycloak")
 public class OrderResource {
     
     @Inject
-    private OrderQuery query;
+    OrderQuery query;
 
     @Inject
     OrderCommandHandler commandHandler;
