@@ -88,7 +88,8 @@ public class ProductResource {
     @POST
     @Path("/push/{id}/{count}")
     @Produces(MediaType.APPLICATION_JSON)
-    public ProductJson push(@NotEmpty @PathParam("id") final String id, @NotNull @Min(1) @PathParam("count") final Integer count) {
+    public ProductJson push(@NotEmpty @PathParam("id") final String id,
+            @NotNull @Min(1) @PathParam("count") final Integer count) {
         return commandHandler.push(id, count)
                 .map(ProductJson::new)
                 .orElseThrow(() -> new NotFoundException("No Product found for id=" + id));

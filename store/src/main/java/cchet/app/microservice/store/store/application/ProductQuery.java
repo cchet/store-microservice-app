@@ -24,9 +24,14 @@ public class ProductQuery {
                 .map(this::toProduct)
                 .collect(Collectors.toList());
     }
-
+    public List<Product> listByProductIds(List<String> productIds) {
+        return warehouseClient.findByIds(productIds).stream()
+                .map(this::toProduct)
+                .collect(Collectors.toList());
+    }
+    
     private Product toProduct(final ProductJson productJson) {
-        return new Product(productJson.id, productJson.name, productJson.count, productJson.price,
+        return new Product(productJson.id, productJson.name, productJson.type, productJson.count, productJson.price,
                 productJson.taxPercent);
     }
 }

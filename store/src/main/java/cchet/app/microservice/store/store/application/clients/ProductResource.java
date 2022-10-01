@@ -2,7 +2,10 @@ package cchet.app.microservice.store.store.application.clients;
 
 import java.util.List;
 
+import javax.validation.constraints.NotEmpty;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -15,7 +18,7 @@ import io.quarkus.oidc.token.propagation.JsonWebTokenRequestFilter;
 
 @RegisterRestClient(configKey = "warehouse")
 @RegisterProviders({
-    @RegisterProvider(JsonWebTokenRequestFilter.class)
+        @RegisterProvider(JsonWebTokenRequestFilter.class)
 })
 @Path("/product")
 public interface ProductResource {
@@ -24,4 +27,10 @@ public interface ProductResource {
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
     public List<ProductJson> list();
+
+    @POST
+    @Path("/search/id")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<ProductJson> findByIds(@NotEmpty final List<String> ids);
 }

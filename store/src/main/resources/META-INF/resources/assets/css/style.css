@@ -1,0 +1,8 @@
+.content-section {
+    /*position: absolute;
+    top: 55px;
+    
+    bottom: 10px;*/
+    width: 100%;
+    overflow-y: scroll;
+}

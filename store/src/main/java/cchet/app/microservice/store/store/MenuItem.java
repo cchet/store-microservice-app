@@ -5,7 +5,8 @@ import java.util.Optional;
 public enum MenuItem {
     STORE,
     PRODUCTS,
-    ORDERS;
+    ORDERS,
+    BASKET;
 
     public static Optional<MenuItem> of(final String name) {
         try {
