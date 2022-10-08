@@ -15,6 +15,22 @@ This project requires the following tools to be available on your machine.
 * Docker/Docker-Compose
 * An IDE of your choice
 
+== Run the store
+
+=== Generate certificates/truststore
+
+Execute the command `./generate-service-certificates.sh` in the project root directory to generate the certificates.
+
+IMPORTANT: The `application.properties` files of the applications don't need to be updated, they are already properly configured.
+
+=== Start the depending service
+
+Execute `docker-compose -f infrastructure/compose up -d` to start the database and sso services.
+
+=== Start the application services
+
+Start the application services each one in a own shell with the command `quarkus dev --debug-port 500x`
+
 == Services
 
 The following sections describe the services the store-microservices-application contains.
@@ -26,7 +42,7 @@ The store-service is a Quarkus based application which proivdes the UI (Quarkus 
 The store can be accessed:
 
 * `Standalone` +
-http://localhost:8080/api/
+https://localhost:8443/api/
 
 === order-service
 
@@ -37,7 +53,7 @@ The order service exposes a swagger-ui which is also secured via OpenIdConnect. 
 The order service api can be tested via:
 
 * `Standalone Swagger-UI` +
-http://localhost:8081/q/swagger-ui/
+https://localhost:8444/q/swagger-ui/
 
 === warehouse-service
 
@@ -48,7 +64,7 @@ The warehouse service exposes a swagger-ui which is also secured via OpenIdConne
 The warehouse service api can be tested via:
 
 * `Standalone Swagger-UI` +
-http://localhost:8082/q/swagger-ui/
+https://localhost:8445/q/swagger-ui/
 
 === sso-service
 
