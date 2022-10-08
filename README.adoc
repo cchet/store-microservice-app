@@ -1,6 +1,22 @@
+:imagesdir: doc/img
 = Store microservice application
 
-The store application is an application which consists of 3 microservices along with their corresponding databases and a sso service, for the authentication.
+The store application is an application which consists of 3 microservices along with their corresponding databases and a sso service, for the authentication and authorization.
+
+image::infrastructure.svg["Store service infrastructure"]
+
+== store-service
+
+The store-service is a Quarkus based application which proivdes the UI (Quarkus Qute) for the store application. The UI is secured via OpenIDConnect but not the welcome page which is public.
+
+The store can be accessed:
+
+* `Standalone local` +
+http://localhost:8080/api/
+
+== order-service
+
+The order-service is a Quarkus based application which handles orders for the store. The service is secured and accepts only JWT tokens with the audience `store-service`, so only users logged into the store can access their placed/fullfiles orders and can place new orders.
 
 == Keycloak
 
