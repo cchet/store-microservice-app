@@ -82,6 +82,14 @@ The sso service admin console can be accessed via:
 * `Standalone` +
 http://localhost:9080/
 
+== How to use Swagger-UI
+
+The order-service and warehouse-service host the swagger-Ui which can be used to test the rest endpoints. The servie are secured, so you need to login with a customer user and the store-service client.
+
+image::swagger-ui-authorize.png["Authorize in swagger ui"]
+
+IMPORTANT: The microprofile-jwt scope must be selected, and the store-service client secret must be used which is defined in the file `store/src/main/resources/application.properties`. 
+
 == Technical Notes
 
 === Keycloak

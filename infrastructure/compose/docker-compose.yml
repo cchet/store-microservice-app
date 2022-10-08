@@ -40,6 +40,7 @@ services:
     restart: always
     ports:
       - 9080:8080
+      - 9443:8443
     environment:
       KEYCLOAK_ADMIN: keycloak
       KEYCLOAK_ADMIN_PASSWORD: keycloak
@@ -47,7 +48,7 @@ services:
       KC_DB_URL: jdbc:postgresql://sso-db:5432/keycloak
       KC_DB_USER: keycloak
       KC_DB_PASSWORD: keycloak
-    command: ["start-dev", "--import-realm"]
+    command: ["start-dev", "--import-realm", "--http-enabled", "false", "--https-key-store-file", "/opt/keycloak/data/import/sso.p12", "--https-key-store-password", "changeit", "--https-trust-store-file", "/opt/keycloak/data/import/truststore.p12", "--https-trust-store-password", "changeit"]
     volumes:
       - ./keycloak/import:/opt/keycloak/data/import:ro
       - ./keycloak/export:/opt/keycloak/data/export:rw
