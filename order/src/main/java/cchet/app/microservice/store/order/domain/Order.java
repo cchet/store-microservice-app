@@ -61,8 +61,8 @@ public class Order extends PanacheEntityBase {
         return order;
     }
 
-    public static List<Order> listForUser(final String user) {
-        return find("username = :username", Sort.descending("updatedDate", "id"), Map.of("username", user)).list();
+    public static List<Order> listPlacedOrFulfilledForUser(final String user) {
+        return find("username = :username and state != :state", Sort.descending("updatedDate", "id"), Map.of("username", user, "state", OrderState.CANCELED)).list();
     }
 
     public static Optional<Order> findPlacedOrderForId(final String id) {
@@ -75,6 +75,10 @@ public class Order extends PanacheEntityBase {
 
     public void fulfill() {
         state = OrderState.FULLFULLED;
+    }
+
+    public void cancel() {
+        state = OrderState.CANCELED;
     }
 
     @PrePersist

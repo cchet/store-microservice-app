@@ -42,4 +42,10 @@ public interface OrderResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public OrderJson fulfill(@NotEmpty @PathParam("id") String id);
+    
+    @POST
+    @Path("/cancel/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public OrderJson cancel(@NotEmpty @PathParam("id") String id);
 }

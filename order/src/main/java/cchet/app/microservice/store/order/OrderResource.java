@@ -11,8 +11,8 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
@@ -28,7 +28,7 @@ import io.quarkus.security.Authenticated;
 @Authenticated
 @SecurityRequirement(name = "Keycloak")
 public class OrderResource {
-    
+
     @Inject
     OrderQuery query;
 
@@ -40,7 +40,6 @@ public class OrderResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public List<OrderJson> list() {
-        // TODO: Only list for user from security principal!
         return query.list().stream().map(OrderJson::new).collect(Collectors.toList());
     }
 
@@ -49,7 +48,8 @@ public class OrderResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public OrderJson place(@NotEmpty @Valid List<ItemJson> items) {
-        final List<Item> itemsDomain = items.stream().map(i -> Item.of(i.productId, i.count)).collect(Collectors.toList());
+        final List<Item> itemsDomain = items.stream().map(i -> Item.of(i.productId, i.count))
+                .collect(Collectors.toList());
         final Order order = commandHandler.placeOrder(itemsDomain);
         return new OrderJson(order);
     }
@@ -58,8 +58,17 @@ public class OrderResource {
     @Path("/fulfill/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public OrderJson fulfill(@NotEmpty @QueryParam("id") String id) {
+    public OrderJson fulfill(@NotEmpty @PathParam("id") String id) {
         final Order order = commandHandler.fulfill(id);
+        return new OrderJson(order);
+    }
+
+    @POST
+    @Path("/cancel/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public OrderJson cancel(@NotEmpty @PathParam("id") String id) {
+        final Order order = commandHandler.cancel(id);
         return new OrderJson(order);
     }
 }

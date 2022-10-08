@@ -71,6 +71,12 @@ public class OrderCommandHandler {
         return order;
     }
 
+    public Order cancel(final String id) {
+        final var order = Order.findPlacedOrderForId(id).orElseThrow(() -> new OrderException("Order not found"));
+        order.cancel();
+        return order;
+    }
+
     private ResolvedItems resolveInvalidAndFillValidOrderItems(final List<Item> items) {
         final var idToItem = items.stream()
                 .collect(Collectors.toMap(i -> i.productId, Function.identity()));

@@ -1,5 +1,7 @@
 {@java.util.Map<java.lang.String,java.util.List<cchet.app.microservice.store.store.domain.Product>> productToTypeMap}
 {@cchet.app.microservice.store.store.domain.Product product}
+{@java.util.Map<cchet.app.microservice.store.store.domain.OrderState,java.util.List<cchet.app.microservice.store.store.domain.Order>> orderStateToOrderMap}
+{@cchet.app.microservice.store.store.domain.Product product}
 {@java.util.List<cchet.app.microservice.store.store.domain.Order> orders}
 {@java.util.List<cchet.app.microservice.store.store.domain.Product> products}
 {@cchet.app.microservice.store.store.MenuItem menuItem}
@@ -98,31 +100,52 @@
               </div>
           {#else if menuItem.name is 'ORDERS'}
               <div class="container mt-3 mb-3">
-                {#if orders.empty == false}
-                  <ol class="list-group list-group-numbered">
-                  {#for order in orders}
-                    <li class="list-group-item d-flex justify-content-between align-items-start">
-                      <div class="ms-2 me-auto">
-                        <div class="fw-bold">{order.id} - {order.price}</div>
-                        itemCount {order.items.size()}
-                      </div>
-                      <div class="badge bg-primary rounded-pill me-2">{time:format(order.createdAt, dateTimePattern)}</div>
-                      <div class="badge bg-primary rounded-pill">{order.price}&euro;</div>
-                    </li>
+                {#if orderStateToOrderMap.empty == false}
+                  {#for entry in orderStateToOrderMap.entrySet}
+                    <div class="mt-2">
+                    <h2>{entry.key.name()}</h2>
+                    <ul class="list-group list-group-numbered">
+                    {#for order in entry.value}
+                      <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <div class="ms-2 me-auto">
+                          <div class="fw-bold">{order.id}</div>
+                          Product count: {order.items.size()}
+                          <ul>
+                          {#for item in order.items}
+                            <li>{item.count}x {item.productId}</li>
+                          {/for}
+                          </ul>
+                          {#if entry.key.name() == "PLACED"}
+                          <div class="mt-2">
+                            <form action="/ui/secured/orders" method="POST">
+                              <input type="hidden" name="orderId" value="{order.id}" />
+                              <button name="action" value="fufill" type="submit" class="btn btn-primary btn-sm">
+                                Fulfill
+                              </button>
+                              <button name="action" value="cancel" type="submit" class="btn btn-primary btn-sm">
+                                Cancel
+                              </button>
+                            </form>
+                          </div>
+                      {/if}
+                        </div>
+                        <div class="badge bg-primary rounded-pill me-2">placed at: {time:format(order.createdAt, dateTimePattern)}</div>
+                        <div class="badge bg-primary rounded-pill">{order.price}&euro;</div>
+                      </li>
+                    {/for}
+                    </ul>
+                  </div>
                   {/for}
-                  </ol>
                 {#else}
                   <div class="container d-flex align-items-center flex-column justify-content-center">
                     <img src="/assets/images/empty-bag.png" width="10%" alt="Empty bag"/>
                     <h1>You have no orders yet</h1>
                   </div>
                 {/if}
-                </div>
+              </div>
           {#else if menuItem.name is 'BASKET'}
               <div class="container mt-3 mb-3">
                 {#if basket.items.empty == false}
-                  <h1 class="text-center">Basket Items</h1>
-                  <hr/>
                   {#for entry in productToTypeMap.entrySet}
                     <div class="mt-2">
                       <h2>{entry.key}</h2>
@@ -133,7 +156,7 @@
                             <div class="fw-bold">{product.id} - {product.name}</div>
                             Price: {product.price}&euro;, Tax: {product.taxRate}%
                           </div>
-                          <span class="badge bg-primary rounded-pill">{basket.coundForProductId(product.id)} added</span>
+                          <span class="badge bg-primary rounded-pill">{basket.coundForProductId(product.id)}x</span>
                         </li>
                       {/for}
                       </ul>

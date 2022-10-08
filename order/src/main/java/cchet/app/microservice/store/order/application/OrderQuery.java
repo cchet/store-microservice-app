@@ -20,6 +20,6 @@ public class OrderQuery {
     String username;
 
     public List<Order> list(){
-        return Order.listForUser(username);
+        return Order.listPlacedOrFulfilledForUser(username);
     }
 }
