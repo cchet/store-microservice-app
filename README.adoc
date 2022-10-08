@@ -5,31 +5,70 @@ The store application is an application which consists of 3 microservices along 
 
 image::infrastructure.svg["Store service infrastructure"]
 
-== store-service
+== Setup
+
+This project requires the following tools to be available on your machine.
+
+* Java 17
+* Maven 3.x.x
+* quarkus-cli
+* Docker/Docker-Compose
+* An IDE of your choice
+
+== Services
+
+The following sections describe the services the store-microservices-application contains.
+
+=== store-service
 
 The store-service is a Quarkus based application which proivdes the UI (Quarkus Qute) for the store application. The UI is secured via OpenIDConnect but not the welcome page which is public.
 
 The store can be accessed:
 
-* `Standalone local` +
+* `Standalone` +
 http://localhost:8080/api/
 
-== order-service
+=== order-service
 
 The order-service is a Quarkus based application which handles orders for the store. The service is secured and accepts only JWT tokens with the audience `store-service`, so only users logged into the store can access their placed/fullfiles orders and can place new orders.
 
-== Keycloak
+The order service exposes a swagger-ui which is also secured via OpenIdConnect. To use it, you need to log in with a user and provide the store client_id and client_credential.
 
-Keycloak is used as the SSO service the services use for the authentication.
+The order service api can be tested via:
 
-Available users
+* `Standalone Swagger-UI` +
+http://localhost:8081/q/swagger-ui/
 
-* Keycloak admin user: +
+=== warehouse-service
+
+The warehouse-service is a Quarkus based application which handles the available products for the store. The store-service loads available products and the order-service pulls products when a order gets fullfiled. The service is secured and accepts only JWT tokens with the audience `store-service`, so only users logged into the store can access the available products.
+
+The warehouse service exposes a swagger-ui which is also secured via OpenIdConnect. To use it, you need to log in with a user and provide the store client_id and client_credential.
+
+The warehouse service api can be tested via:
+
+* `Standalone Swagger-UI` +
+http://localhost:8082/q/swagger-ui/
+
+=== sso-service
+
+The sso-service is Keycloak which handles the authentication/authorization of users.
+
+Available users:
+
+* Keycloak admin +
   keycloak/keycloak
-* Store Customer user: +
+* Store Customer +
   customer/customer
 
-=== Notes
+The sso service admin console can be accessed via:
+
+* `Standalone` +
+http://localhost:9080/
+
+== Technical Notes
+
+=== Keycloak
 
 When the realm is exported via the GUI then no users are exported so export the full realm via the following command which has to be executed in the directory `/opt/keycloak`
 
