@@ -7,7 +7,7 @@ services:
       - 5432:5432
     environment:
       POSTGRES_USER: store
-      POSTGRES_PASSWORD: ${store_DB_PASSWORD}
+      POSTGRES_PASSWORD: store
       POSTGRES_DB: store
   order-db:
     image: postgres:bullseye
@@ -15,7 +15,7 @@ services:
       - 5433:5432
     environment:
       POSTGRES_USER: order
-      POSTGRES_PASSWORD: ${order_DB_PASSWORD}
+      POSTGRES_PASSWORD: order
       POSTGRES_DB: order
   warehouse-db:
     image: postgres:bullseye
@@ -23,14 +23,14 @@ services:
       - 5434:5432
     environment:
       POSTGRES_USER: warehouse
-      POSTGRES_PASSWORD: ${warehouse_DB_PASSWORD}
+      POSTGRES_PASSWORD: warehouse
       POSTGRES_DB: warehouse
   sso-db:
     image: postgres:bullseye
     restart: always
     environment:
       POSTGRES_USER: sso
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_PASSWORD: sso
       POSTGRES_DB: sso
   sso:
     image: quay.io/keycloak/keycloak:19.0.2
@@ -43,12 +43,15 @@ services:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://sso-db:5432/sso
       KC_DB_USERNAME: sso
-      KC_DB_PASSWORD: ${DB_PASSWORD}
+      KC_DB_PASSWORD: sso
+      CLIENT_SECRET_STORE: client-secret-store
+      CLIENT_SECRET_ORDER: client-secret-order
+      CLIENT_SECRET_WAREHOUSE: client-secret-warehouse
     command: ["start-dev", "--import-realm", "--http-enabled", "false", "--https-key-store-file", "/secret/sso.p12", "--https-key-store-password", "${KEY_STORE_PASSWORD}", "--https-trust-store-file", "/secret/truststore.p12", "--https-trust-store-password", "${TRUST_STORE_PASSWORD}"]
     volumes:
       - ../keycloak/import:/opt/keycloak/data/import:ro
-      - ./sso.p12:/secret/sso.p12:ro
-      - ./truststore.p12:/secret/truststore.p12:ro
+      - ../../secrets/sso.p12:/secret/sso.p12:ro
+      - ../../secrets/truststore.p12:/secret/truststore.p12:ro
       - ./keycloak/export:/opt/keycloak/data/export:rw
     depends_on:
       - sso-db

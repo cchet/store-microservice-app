@@ -42,7 +42,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: '{NAME}'
-              key: db.password
+              key: db_password
       restartPolicy: Always
       volumes:
       - name: postgres-volume-mount

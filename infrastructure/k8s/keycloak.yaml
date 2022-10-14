@@ -33,10 +33,13 @@ spec:
         - name: secret
           secret:
             secretName: sso
+        - name: import
+          configMap:
+            name: sso
       containers:
         - name: sso
           image: quay.io/keycloak/keycloak:19.0.3
-          args: ["start-dev", "--import-realm", "--http-enabled", "false", "--https-key-store-file", "/secrets/sso.p12", "--https-trust-store-file", "/secrets/truststore.p12"]
+          args: ["start-dev", "--import-realm", "--http-enabled", "false", "--https-key-store-file", "/secrets/keystore.p12", "--https-trust-store-file", "/secrets/truststore.p12"]
           resources:
             limits:
               memory: "512Mi"
@@ -44,31 +47,34 @@ spec:
           env:
             - name: KEYCLOAK_ADMIN
               value: 'keycloak'
-            - name: KEYCLOAK_ADMIN_PASSWORD
-              value: 'keycloak'
             - name: KC_DB
               value: 'postgres'
             - name: KC_DB_URL
               value: 'jdbc:postgresql://sso-db:5432/sso'
             - name: KC_DB_USERNAME
               value: 'sso'
+            - name: KC_PROXY
+              value: "edge"
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: sso
+                  key: admin_password
             - name: KC_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: sso
-                  key: db.password
-            - name: KC_PROXY
-              value: "edge"
+                  key: db_password
             - name: KC_HTTPS_KEY_STORE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: sso
-                  key: keystore.password
+                  key: keystore_password
             - name: KC_HTTPS_TRUST_STORE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: sso
-                  key: truststore.password
+                  key: truststore_password
           ports:
             - name: http
               containerPort: 8443
@@ -79,4 +85,7 @@ spec:
           volumeMounts:
             - name: secret
               mountPath: "/secrets"
+              readOnly: true
+            - name: import
+              mountPath: "/opt/keycloak/data/import"
               readOnly: true

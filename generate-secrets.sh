@@ -1,48 +1,65 @@
 #!/bin/sh
 
-SECURITY="security"
-TRUSTSTORE_PASSWORD="$(openssl rand -hex 12)"
-rm -rf ${SECURITY}
-mkdir ${SECURITY}
+set -e
 
-function generate_secret_env {
-    mkdir ${SECURITY}/${1}
-    touch ${SECURITY}/${1}/.env
-    echo "KEY_STORE_PASSWORD=$(openssl rand -hex 12)" >> ${SECURITY}/${1}/.env
-    echo "DB_PASSWORD=$(openssl rand -hex 12)" >> ${SECURITY}/${1}/.env
-    echo "TRUST_STORE_PASSWORD=${TRUSTSTORE_PASSWORD}" >> ${SECURITY}/${1}/.env
+SECRETS_DIR="secrets"
+INFRA_DIR="infrastructure"
+COMPOSE_DIR="${INFRA_DIR}/compose"
+TRUST_STORE_PASSWORD="$(openssl rand -hex 12)"
+rm -rf ${SECRETS_DIR}
+mkdir ${SECRETS_DIR}
+
+function generate_certificate {
+    openssl req -passout pass:"${2}" -days 365 -subj /CN=${1}/  -newkey rsa:2048 -nodes -keyout ${SECRETS_DIR}/${1}.key -out ${SECRETS_DIR}/${1}.csr
+    openssl x509 -signkey ${SECRETS_DIR}/${1}.key -in ${SECRETS_DIR}/${1}.csr -req -days 365 -out ${SECRETS_DIR}/${1}.crt
+    openssl pkcs12 -password pass:"${2}" -inkey ${SECRETS_DIR}/${1}.key -in ${SECRETS_DIR}/${1}.crt -export -out ${SECRETS_DIR}/${1}.p12
+    keytool -noprompt -import -storetype PKCS12 -storepass ${TRUST_STORE_PASSWORD} -file ${SECRETS_DIR}/${1}.crt -alias ${1} -keystore ${SECRETS_DIR}/truststore.p12
 }
 
-function generate_certificates {
-    echo "generating keyPair for service ${1}"
-    source ${SECURITY}/${1}/.env
-    openssl req -passout pass:"${KEY_STORE_PASSWORD}" -days 365 -subj /CN=${1}/  -newkey rsa:2048 -nodes -keyout ${SECURITY}/${1}.key -out ${SECURITY}/${1}.csr
-    openssl x509 -signkey ${SECURITY}/${1}.key -in ${SECURITY}/${1}.csr -req -days 365 -out ${SECURITY}/${1}/${1}.crt
-    openssl pkcs12 -password pass:"${KEY_STORE_PASSWORD}" -inkey ${SECURITY}/${1}.key -in ${SECURITY}/${1}/${1}.crt -export -out ${SECURITY}/${1}/${1}.p12
-    keytool -noprompt -import -storetype PKCS12 -storepass ${TRUST_STORE_PASSWORD} -file ${SECURITY}/${1}/${1}.crt -alias ${1} -keystore ${SECURITY}/truststore.p12
+function generate_env_file {
+    touch ${SECRETS_DIR}/${1}.env
+    echo "KEY_STORE_PASSWORD=${2}" >> ${SECRETS_DIR}/${1}.env
+    echo "TRUST_STORE_PASSWORD=${TRUST_STORE_PASSWORD}" >> ${SECRETS_DIR}/${1}.env
+    echo "DB_PASSWORD=$(openssl rand -hex 12) " >> ${SECRETS_DIR}/${1}.env
 }
 
-function enrich_env {
-    source ${SECURITY}/${1}/.env
-    echo "${1}_DB_PASSWORD=${DB_PASSWORD}" >> ${SECURITY}/${2}/.env
+function generate_service_secrets {
+    local KEY_STORE_PASSWORD=$(openssl rand -hex 12) 
+    local CLIENT_SECRET=$(openssl rand -hex 12) 
+    
+    generate_certificate ${1} ${KEY_STORE_PASSWORD}
+    generate_env_file ${1} ${KEY_STORE_PASSWORD}
+
+    cp -f ${SECRETS_DIR}/${1}.env ${1}/.env
+    cp -f ${SECRETS_DIR}/${1}.p12 ${1}/keystore.p12
 }
 
-generate_secret_env store
-generate_secret_env order
-generate_secret_env warehouse
-generate_secret_env sso
+function generate_sso_secrets {
+    local KEY_STORE_PASSWORD=$(openssl rand -hex 12) 
+    local CLIENT_SECRET_STORE=$(openssl rand -hex 12)
+    local CLIENT_SECRET_ORDER=$(openssl rand -hex 12)
+    local CLIENT_SECRET_WAREHOUSE=$(openssl rand -hex 12)
 
-generate_certificates store
-generate_certificates order
-generate_certificates warehouse
-generate_certificates sso
+    generate_certificate sso ${KEY_STORE_PASSWORD}
+    generate_env_file sso ${KEY_STORE_PASSWORD}
+    echo "ADMIN_PASSWORD=$(openssl rand -hex 12)" >> ${SECRETS_DIR}/sso.env
+    echo "CLIENT_SECRET_STORE=${CLIENT_SECRET_STORE}" >> ${SECRETS_DIR}/sso.env
+    echo "CLIENT_SECRET_ORDER=${CLIENT_SECRET_ORDER}" >> ${SECRETS_DIR}/sso.env
+    echo "CLIENT_SECRET_WAREHOUSE=${CLIENT_SECRET_WAREHOUSE}" >> ${SECRETS_DIR}/sso.env
 
-enrich_env store sso
-enrich_env order sso
-enrich_env warehouse sso
+    # Set client_secrets on service .env files
+    echo "CLIENT_SECRET=${CLIENT_SECRET_STORE}" >> ${SECRETS_DIR}/store.env
+    echo "CLIENT_SECRET=${CLIENT_SECRET_ORDER}" >> ${SECRETS_DIR}/order.env
+    echo "CLIENT_SECRET=${CLIENT_SECRET_WAREHOUSE}" >> ${SECRETS_DIR}/warehouse.env
 
-cp -rf ${SECURITY}/truststore.p12 ${SECURITY}/store/ store/
-cp -rf ${SECURITY}/truststore.p12 ${SECURITY}/order/ order/
-cp -rf ${SECURITY}/truststore.p12 ${SECURITY}/warehouse/ warehouse/
-cp -rf ${SECURITY}/truststore.p12 ${SECURITY}/sso/ infrastructure/compose
-cp -rf ${SECURITY}/truststore.p12 ${SECURITY}/sso/ infrastructure/k8s
+    cp -f ${SECRETS_DIR}/sso.env ${COMPOSE_DIR}/.env
+}
+
+generate_service_secrets store
+generate_service_secrets order
+generate_service_secrets warehouse
+generate_sso_secrets
+
+cp -f ${SECRETS_DIR}/truststore.p12 store/truststore.p12
+cp -f ${SECRETS_DIR}/truststore.p12 order/truststore.p12
+cp -f ${SECRETS_DIR}/truststore.p12 warehouse/truststore.p12

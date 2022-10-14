@@ -15,13 +15,23 @@ This project requires the following tools to be available on your machine.
 * Docker/Docker-Compose
 * An IDE of your choice
 
-== Run the store
+For Kubernetes eployments.
 
-=== Generate certificates/truststore
+* Kubernetes (e.g microk8s)
+* kubectl
 
-Execute the command `./generate-service-certificates.sh` in the project root directory to generate the certificates.
+== Run the application
+
+=== Generate secrets
+
+Execute the command `./generate-secrests.sh` in the project root directory to generate the secrets. +
+The secrets are generated to `secrets/` directory and the `*.p12` files (keystores and the truststore) and `.env`  files (containing the keystore and truststore secrets) are also copied to the quarkus projects and `infrastructure/compose` directories.
 
 IMPORTANT: The `application.properties` files of the applications don't need to be updated, they are already properly configured.
+
+=== Start the infrastructure
+
+Execute the command `docker-compose up` in the directory `infrastructure/compose` to start the sso and database services.
 
 === Start the depending service
 
@@ -82,13 +92,26 @@ The sso service admin console can be accessed via:
 * `Standalone` +
 http://localhost:9080/
 
-== How to use Swagger-UI
+=== Kubernetes
+
+The application is also deployable to a Kubernetes Cluster which is documented here.
+
+=== Prepare
+
+Create a Kubernetes namespace and set the current context to it. +
+Execut the script `setup-k8s.sh` to create the sso and database services and related resources.
+
+=== Deploy the services
+
+TODO: Add documentation
+
+== How to use Swagger-UI (Dev mode only)
 
 The order-service and warehouse-service host the swagger-Ui which can be used to test the rest endpoints. The servie are secured, so you need to login with a customer user and the store-service client.
 
 image::swagger-ui-authorize.png["Authorize in swagger ui"]
 
-IMPORTANT: The microprofile-jwt scope must be selected, and the store-service client secret must be used which is defined in the file `store/src/main/resources/application.properties`. 
+IMPORTANT: The microprofile-jwt scope must be selected, and the store-service client secret `client-secret-store` must be used.
 
 == Technical Notes
 
