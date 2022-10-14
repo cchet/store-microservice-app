@@ -3,41 +3,37 @@ version: '3.1'
 services:
   store-db:
     image: postgres:bullseye
-    restart: always
     ports:
       - 5432:5432
     environment:
       POSTGRES_USER: store
-      POSTGRES_PASSWORD: store
+      POSTGRES_PASSWORD: ${store_DB_PASSWORD}
       POSTGRES_DB: store
   order-db:
     image: postgres:bullseye
-    restart: always
     ports:
       - 5433:5432
     environment:
       POSTGRES_USER: order
-      POSTGRES_PASSWORD: order
+      POSTGRES_PASSWORD: ${order_DB_PASSWORD}
       POSTGRES_DB: order
   warehouse-db:
     image: postgres:bullseye
-    restart: always
     ports:
       - 5434:5432
     environment:
       POSTGRES_USER: warehouse
-      POSTGRES_PASSWORD: warehouse
+      POSTGRES_PASSWORD: ${warehouse_DB_PASSWORD}
       POSTGRES_DB: warehouse
   sso-db:
     image: postgres:bullseye
     restart: always
     environment:
-      POSTGRES_USER: keycloak
-      POSTGRES_PASSWORD: keycloak
-      POSTGRES_DB: keycloak
+      POSTGRES_USER: sso
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: sso
   sso:
     image: quay.io/keycloak/keycloak:19.0.2
-    restart: always
     ports:
       - 9080:8080
       - 9443:8443
@@ -45,12 +41,14 @@ services:
       KEYCLOAK_ADMIN: keycloak
       KEYCLOAK_ADMIN_PASSWORD: keycloak
       KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://sso-db:5432/keycloak
-      KC_DB_USER: keycloak
-      KC_DB_PASSWORD: keycloak
-    command: ["start-dev", "--import-realm", "--http-enabled", "false", "--https-key-store-file", "/opt/keycloak/data/import/sso.p12", "--https-key-store-password", "changeit", "--https-trust-store-file", "/opt/keycloak/data/import/truststore.p12", "--https-trust-store-password", "changeit"]
+      KC_DB_URL: jdbc:postgresql://sso-db:5432/sso
+      KC_DB_USERNAME: sso
+      KC_DB_PASSWORD: ${DB_PASSWORD}
+    command: ["start-dev", "--import-realm", "--http-enabled", "false", "--https-key-store-file", "/secret/sso.p12", "--https-key-store-password", "${KEY_STORE_PASSWORD}", "--https-trust-store-file", "/secret/truststore.p12", "--https-trust-store-password", "${TRUST_STORE_PASSWORD}"]
     volumes:
-      - ./keycloak/import:/opt/keycloak/data/import:ro
+      - ../keycloak/import:/opt/keycloak/data/import:ro
+      - ./sso.p12:/secret/sso.p12:ro
+      - ./truststore.p12:/secret/truststore.p12:ro
       - ./keycloak/export:/opt/keycloak/data/export:rw
     depends_on:
       - sso-db

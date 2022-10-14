@@ -1,0 +1,82 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sso
+  labels:
+    app: sso
+spec:
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  selector:
+    app: sso
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sso
+  labels:
+    app: sso
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sso
+  template:
+    metadata:
+      labels:
+        app: sso
+    spec:
+      volumes:
+        - name: secret
+          secret:
+            secretName: sso
+      containers:
+        - name: sso
+          image: quay.io/keycloak/keycloak:19.0.3
+          args: ["start-dev", "--import-realm", "--http-enabled", "false", "--https-key-store-file", "/secrets/sso.p12", "--https-trust-store-file", "/secrets/truststore.p12"]
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          env:
+            - name: KEYCLOAK_ADMIN
+              value: 'keycloak'
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              value: 'keycloak'
+            - name: KC_DB
+              value: 'postgres'
+            - name: KC_DB_URL
+              value: 'jdbc:postgresql://sso-db:5432/sso'
+            - name: KC_DB_USERNAME
+              value: 'sso'
+            - name: KC_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: sso
+                  key: db.password
+            - name: KC_PROXY
+              value: "edge"
+            - name: KC_HTTPS_KEY_STORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: sso
+                  key: keystore.password
+            - name: KC_HTTPS_TRUST_STORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: sso
+                  key: truststore.password
+          ports:
+            - name: http
+              containerPort: 8443
+          readinessProbe:
+            httpGet:
+              path: /realms/master
+              port: 8443
+          volumeMounts:
+            - name: secret
+              mountPath: "/secrets"
+              readOnly: true

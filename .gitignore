@@ -1,4 +1,5 @@
 target/
+generated/
 .apt_generated/
 .apt_generated_tests/
 security/
@@ -7,4 +8,6 @@ security/
 *.p12
 *.key
 *.crt
+*.csr
+.env
 infrastructure/compose/keycloak/export/
