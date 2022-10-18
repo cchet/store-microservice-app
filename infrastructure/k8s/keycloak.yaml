@@ -6,12 +6,13 @@ metadata:
     app: sso
 spec:
   ports:
-  - name: http
-    port: 8080
-    targetPort: 8080
+  - name: https
+    port: 8443
+    protocol: TCP
+    targetPort: 8443
   selector:
     app: sso
-  type: LoadBalancer
+  type: ClusterIP
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -32,6 +33,11 @@ spec:
       volumes:
         - name: secret
           secret:
+            items:
+              - key: keystore
+                path: keystore.p12
+              - key: truststore
+                path: truststore.p12
             secretName: sso
         - name: import
           configMap:
@@ -76,8 +82,9 @@ spec:
                   name: sso
                   key: truststore_password
           ports:
-            - name: http
+            - name: https
               containerPort: 8443
+              protocol: TCP
           readinessProbe:
             httpGet:
               path: /realms/master

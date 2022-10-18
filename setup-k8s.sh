@@ -21,8 +21,8 @@ function clean {
 function create_service_secret {
     source ${SECRETS_DIR}/${1}.env
     kubectl create secret generic ${1} \
-        --from-file=keystore.p12=${SECRETS_DIR}/${1}.p12 \
-        --from-file=truststore.p12=${SECRETS_DIR}/truststore.p12 \
+        --from-file=keystore=${SECRETS_DIR}/${1}.p12 \
+        --from-file=truststore=${SECRETS_DIR}/truststore.p12 \
         --from-literal=keystore_password=${KEY_STORE_PASSWORD} \
         --from-literal=truststore_password=${TRUST_STORE_PASSWORD} \
         --from-literal=db_password=${DB_PASSWORD} \
@@ -33,8 +33,8 @@ function create_service_secret {
 function create_sso_secret {
     source ${SECRETS_DIR}/sso.env
     kubectl create secret generic sso \
-        --from-file=keystore.p12=${SECRETS_DIR}/sso.p12 \
-        --from-file=truststore.p12=${SECRETS_DIR}/truststore.p12 \
+        --from-file=keystore=${SECRETS_DIR}/sso.p12 \
+        --from-file=truststore=${SECRETS_DIR}/truststore.p12 \
         --from-literal=keystore_password=${KEY_STORE_PASSWORD} \
         --from-literal=truststore_password=${TRUST_STORE_PASSWORD} \
         --from-literal=admin_password=${ADMIN_PASSWORD} \
