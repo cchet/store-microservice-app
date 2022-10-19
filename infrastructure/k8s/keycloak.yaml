@@ -45,7 +45,7 @@ spec:
       containers:
         - name: sso
           image: quay.io/keycloak/keycloak:19.0.3
-          args: ["start-dev", "--import-realm", "--http-enabled", "false", "--https-key-store-file", "/secrets/keystore.p12", "--https-trust-store-file", "/secrets/truststore.p12"]
+          args: ["start-dev", "--import-realm", "--http-enabled", "false", "--https-port", "8443", "--https-key-store-file", "/secrets/keystore.p12", "--https-trust-store-file", "/secrets/truststore.p12"]
           resources:
             limits:
               memory: "512Mi"
@@ -89,6 +89,10 @@ spec:
             httpGet:
               path: /realms/master
               port: 8443
+              scheme: HTTPS
+            initialDelaySeconds: 20
+            periodSeconds: 5
+            failureThreshold: 5
           volumeMounts:
             - name: secret
               mountPath: "/secrets"
