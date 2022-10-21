@@ -105,7 +105,7 @@ Execut the script `setup-k8s.sh` to create the sso and database services and rel
 
 === Build the Container Images
 
-This command can be used to build the container images, which are pushed to your Docker Hub account. The build is performed by JIB which doesn't need Docker if the image is pushed to a registry immediatelly after the build, therefore you need a Docker Hub account.
+This command can be used to build the container images, which are pushed to your Docker Hub account. The build is performed by Docker.
 
 [source,bash]
 ----
