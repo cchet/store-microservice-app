@@ -12,6 +12,7 @@ This project requires the following tools to be available on your machine.
 * Java 17
 * Maven 3.x.x
 * quarkus-cli
+* openssl
 * Docker/Docker-Compose
 * An IDE of your choice
 
@@ -19,6 +20,7 @@ For Kubernetes eployments.
 
 * Kubernetes (e.g microk8s)
 * kubectl
+* Docker Hub account
 
 == Run the application
 
@@ -101,9 +103,31 @@ The application is also deployable to a Kubernetes Cluster which is documented h
 Create a Kubernetes namespace and set the current context to it. +
 Execut the script `setup-k8s.sh` to create the sso and database services and related resources.
 
-=== Deploy the services
+=== Build the Container Images
 
-TODO: Add documentation
+This command can be used to build the container images, which are pushed to your Docker Hub account. The build is performed by JIB which doesn't need Docker if the image is pushed to a registry immediatelly after the build, therefore you need a Docker Hub account.
+
+[source,bash]
+----
+quarkus build \
+  -D quarkus.container-image.build=true
+  -D quarkus.container-image.group=<YOUR_DOCKER_HUB_USERNAME>
+----
+
+TIP: This command is usefull when you want to try the container images locally.
+
+=== Deploy the services into Kubrenetes
+
+The service can be build and deployed via the following command executed in the projects root directory. 
+
+[source,bash]
+----
+quarkus build \
+  -D quakrus.profile=k8s
+  -D quarkus.container-image.group=<YOUR_DOCKER_HUB_USERNAME>
+----
+
+IMPORTANT: Ensure that you are logged into docker via `docker login` in the shell you execute the command from 
 
 == How to use Swagger-UI (Dev mode only)
 
