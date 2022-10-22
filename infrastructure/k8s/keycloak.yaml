@@ -6,10 +6,10 @@ metadata:
     app: sso
 spec:
   ports:
-  - name: https
-    port: 8443
+  - name: http
+    port: 8080
     protocol: TCP
-    targetPort: 8443
+    targetPort: http
   selector:
     app: sso
   type: ClusterIP
@@ -31,21 +31,13 @@ spec:
         app: sso
     spec:
       volumes:
-        - name: secret
-          secret:
-            items:
-              - key: keystore
-                path: keystore.p12
-              - key: truststore
-                path: truststore.p12
-            secretName: sso
         - name: import
           configMap:
             name: sso
       containers:
         - name: sso
           image: quay.io/keycloak/keycloak:19.0.3
-          args: ["start-dev", "--import-realm", "--http-enabled", "false", "--https-port", "8443", "--https-key-store-file", "/secrets/keystore.p12", "--https-trust-store-file", "/secrets/truststore.p12"]
+          args: ["start-dev", "--import-realm", "--http-enabled", "true"]
           resources:
             limits:
               memory: "512Mi"
@@ -59,44 +51,57 @@ spec:
               value: 'jdbc:postgresql://sso-db:5432/sso'
             - name: KC_DB_USERNAME
               value: 'sso'
-            - name: KC_PROXY
-              value: "edge"
             - name: KEYCLOAK_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: sso
                   key: admin_password
+            - name: KC_PROXY
+              value: "edge"
+            - name: KC_HOSTNAME_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sso
+                  key: hostname_url
             - name: KC_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: sso
                   key: db_password
-            - name: KC_HTTPS_KEY_STORE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: sso
-                  key: keystore_password
-            - name: KC_HTTPS_TRUST_STORE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: sso
-                  key: truststore_password
           ports:
-            - name: https
-              containerPort: 8443
+            - name: http
+              containerPort: 8080
               protocol: TCP
           readinessProbe:
             httpGet:
               path: /realms/master
-              port: 8443
-              scheme: HTTPS
+              port: 8080
+              scheme: HTTP
             initialDelaySeconds: 20
             periodSeconds: 5
             failureThreshold: 5
           volumeMounts:
-            - name: secret
-              mountPath: "/secrets"
-              readOnly: true
             - name: import
               mountPath: "/opt/keycloak/data/import"
               readOnly: true
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: sso
+  annotations:
+    kubernetes.io/ingress.class: "public"
+spec:  
+  tls:
+    - secretName: sso-tls
+  rules:
+    - host: sso.store.mk8s.local
+      http:
+        paths:
+        - backend:
+            service:
+              name: sso
+              port:
+                name: http
+          path: /
+          pathType: Prefix

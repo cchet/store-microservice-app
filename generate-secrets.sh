@@ -10,7 +10,7 @@ rm -rf ${SECRETS_DIR}
 mkdir ${SECRETS_DIR}
 
 function generate_certificate {
-    openssl req -passout pass:"${2}" -days 365 -subj /CN=${1}/  -newkey rsa:2048 -nodes -keyout ${SECRETS_DIR}/${1}.key -out ${SECRETS_DIR}/${1}.csr
+    openssl req -passout pass:"${2}" -days 365 -subj "/CN=${1}.store.mk8s.local/O=${1}.store.mk8s.local"  -newkey rsa:2048 -nodes -keyout ${SECRETS_DIR}/${1}.key -out ${SECRETS_DIR}/${1}.csr
     openssl x509 -signkey ${SECRETS_DIR}/${1}.key -in ${SECRETS_DIR}/${1}.csr -req -days 365 -out ${SECRETS_DIR}/${1}.crt
     openssl pkcs12 -password pass:"${2}" -inkey ${SECRETS_DIR}/${1}.key -in ${SECRETS_DIR}/${1}.crt -export -out ${SECRETS_DIR}/${1}.p12
     keytool -noprompt -import -storetype PKCS12 -storepass ${TRUST_STORE_PASSWORD} -file ${SECRETS_DIR}/${1}.crt -alias ${1} -keystore ${SECRETS_DIR}/truststore.p12

@@ -1,9 +1,48 @@
 :imagesdir: doc/img
 = Store microservice application
 
+This application has been created on the one hand for praticing Quarkus for the Red Hat Certification Cloud-Native-Developer (EX378) and on the other hand for practicing Istio in a Kubernetes environment with a fairly complex application which consists of multiple services and their relating database and a sso server. +
+
+This application runs on the local host with a Docker-Compose infrastructure providing the database instances for the services an a sso service instance. When running locally then the services use https because part of the certification is to secure Quarkus services and rest-clients.
+
+This application runs also on Kubernetes where the services use http, and those services exposed are secured by the ingress controler with TLS termination.
+
+== Application architecture
+
 The store application is an application which consists of 3 microservices along with their corresponding databases and a sso service, for the authentication and authorization.
 
 image::infrastructure.svg["Store service infrastructure"]
+
+=== Services
+
+This secion provides a short explanation of the service which are part of the application.
+
+==== store-service
+
+The store-service is a Quarkus based application which proivdes the UI (Quarkus Qute) for the store application. The UI is secured via OpenIDConnect but not the welcome page which is public.
+
+==== order-service
+
+The order-service is a Quarkus based application which handles orders for the store. The service is secured and accepts only JWT tokens with the audience `store-service`, so only users logged into the store can access their placed/fullfiled orders, and can place new orders.
+
+When running locally, the order service exposes a swagger-ui which is also secured via OpenIdConnect. To use it, you need to log in with a user and provide the store client_id and client_credential.
+
+==== warehouse-service
+
+The warehouse-service is a Quarkus based application which handles the available products for the store. The store-service loads available products and the order-service pulls products when a order gets fullfiled. The service is secured and accepts only JWT tokens with the audience `store-service`, so only users logged into the store can access the available products.
+
+When running locally, the warehouse service exposes a swagger-ui which is also secured via OpenIdConnect. To use it, you need to log in with a user and provide the store client_id and client_credential.
+
+==== sso-service
+
+The sso-service is Keycloak which handles the authentication/authorization of users.
+
+Available users:
+
+* Keycloak admin +
+  keycloak/keycloak
+* Store Customer +
+  customer/customer
 
 == Setup
 
@@ -16,18 +55,20 @@ This project requires the following tools to be available on your machine.
 * Docker/Docker-Compose
 * An IDE of your choice
 
-For Kubernetes eployments.
+For Kubernetes you need
 
 * Kubernetes (e.g microk8s)
 * kubectl
 * Docker Hub account
 
-== Run the application
+== Prepare for local deployments
+
+This section documents the preparation work for running the application locally.
 
 === Generate secrets
 
 Execute the command `./generate-secrests.sh` in the project root directory to generate the secrets. +
-The secrets are generated to `secrets/` directory and the `*.p12` files (keystores and the truststore) and `.env`  files (containing the keystore and truststore secrets) are also copied to the quarkus projects and `infrastructure/compose` directories.
+The secrets are generated to `secrets/` directory and the `*.p12` files (keystores and the truststore) and `.env`  files (containing the keystore and truststore secrets) are also copied to the quarkus project and `infrastructure/compose` directories.
 
 IMPORTANT: The `application.properties` files of the applications don't need to be updated, they are already properly configured.
 
@@ -35,73 +76,18 @@ IMPORTANT: The `application.properties` files of the applications don't need to 
 
 Execute the command `docker-compose up` in the directory `infrastructure/compose` to start the sso and database services.
 
-=== Start the depending service
-
-Execute `docker-compose -f infrastructure/compose up -d` to start the database and sso services.
-
 === Start the application services
 
 Start the application services each one in a own shell with the command `quarkus dev --debug-port 500x`
 
-== Services
-
-The following sections describe the services the store-microservices-application contains.
-
-=== store-service
-
-The store-service is a Quarkus based application which proivdes the UI (Quarkus Qute) for the store application. The UI is secured via OpenIDConnect but not the welcome page which is public.
-
-The store can be accessed:
-
-* `Standalone` +
-https://localhost:8443/api/
-
-=== order-service
-
-The order-service is a Quarkus based application which handles orders for the store. The service is secured and accepts only JWT tokens with the audience `store-service`, so only users logged into the store can access their placed/fullfiles orders and can place new orders.
-
-The order service exposes a swagger-ui which is also secured via OpenIdConnect. To use it, you need to log in with a user and provide the store client_id and client_credential.
-
-The order service api can be tested via:
-
-* `Standalone Swagger-UI` +
-https://localhost:8444/q/swagger-ui/
-
-=== warehouse-service
-
-The warehouse-service is a Quarkus based application which handles the available products for the store. The store-service loads available products and the order-service pulls products when a order gets fullfiled. The service is secured and accepts only JWT tokens with the audience `store-service`, so only users logged into the store can access the available products.
-
-The warehouse service exposes a swagger-ui which is also secured via OpenIdConnect. To use it, you need to log in with a user and provide the store client_id and client_credential.
-
-The warehouse service api can be tested via:
-
-* `Standalone Swagger-UI` +
-https://localhost:8445/q/swagger-ui/
-
-=== sso-service
-
-The sso-service is Keycloak which handles the authentication/authorization of users.
-
-Available users:
-
-* Keycloak admin +
-  keycloak/keycloak
-* Store Customer +
-  customer/customer
-
-The sso service admin console can be accessed via:
-
-* `Standalone` +
-http://localhost:9080/
-
-=== Kubernetes
-
-The application is also deployable to a Kubernetes Cluster which is documented here.
-
-=== Prepare
+== Prepare for Kubernetes eployments
 
 Create a Kubernetes namespace and set the current context to it. +
 Execut the script `setup-k8s.sh` to create the sso and database services and related resources.
+
+The ingress resources of the services use hostnames for distiguishing the service you want to access, so we need to configure the hostnames as aliases in our `/etc/hosts` file.
+
+`<KUBERNETES_CLUSTER_IP> so.store.mk8s.local store.store.k8s.local`
 
 === Build the Container Images
 
@@ -129,7 +115,28 @@ quarkus build \
 
 IMPORTANT: Ensure that you are logged into docker via `docker login` in the shell you execute the command from 
 
-== How to use Swagger-UI (Dev mode only)
+== Access the services
+
+The services deployed locally can be accessed via:
+
+. `store` +
+link:https://localhost:8443/ui[https://localhost:8443/ui] +
+link:https://localhost:8443/q/swagger-ui[https://localhost:8443/q/swagger-ui]
+. `warehouse` +
+link:https://localhost:8444/q/swagger-ui[https://localhost:8444/q/swagger-ui]
+. `order` +
+link:https://localhost:8445/q/swagger-ui[https://localhost:8445/q/swagger-ui]
+. `sso` +
+link:https://localhost:9443[https://localhost:9443]
+
+The services deployed to Kubernetes can be accessed via:
+
+. `store` +
+link:https://store.store.mk8s.local/ui[https://store.store.mk8s.local/ui]
+. `sso` +
+link:https://sso.store.mk8s.local[https://sso.store.mk8s.local]
+
+== How to use Swagger-UI (Local deployments only)
 
 The order-service and warehouse-service host the swagger-Ui which can be used to test the rest endpoints. The servie are secured, so you need to login with a customer user and the store-service client.
 
@@ -149,6 +156,8 @@ When the realm is exported via the GUI then no users are exported so export the 
 bin/kc.sh export --realm store --dir data/export
 ----
 
-This will export the realm and users in teh project directory `infrastructure/compose/keycloak/export`.
+This will export the realm and users in the project directory `infrastructure/compose/keycloak/export`.
 
-The realm and user export need to be merge, because only the realm is imported during startup and therefore we would miss the users.
+The realm and user export need to be merged, because only the realm is imported during startup and therefore we would miss the users.
+
+The client secrets must be set as `client-secret-<SERVICE_NAME>` e.g. `client-secret-order` which are used for local deployments and are replaced with a dynamically generated secret when deployed to Kubernetes.
