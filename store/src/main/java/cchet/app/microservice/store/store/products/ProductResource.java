@@ -1,7 +1,6 @@
-package cchet.app.microservice.store.store;
+package cchet.app.microservice.store.store.products;
 
-import java.util.List;
-import java.util.Map;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.RequestScoped;
@@ -14,9 +13,9 @@ import javax.ws.rs.Path;
 
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
-import cchet.app.microservice.store.store.application.BasketCommandHandler;
-import cchet.app.microservice.store.store.application.ProductQuery;
-import cchet.app.microservice.store.store.domain.Product;
+import cchet.app.microservice.store.store.MenuItem;
+import cchet.app.microservice.store.store.basket.application.BasketCommandHandler;
+import cchet.app.microservice.store.store.products.application.ProductQuery;
 import io.quarkus.oidc.IdToken;
 import io.quarkus.qute.Template;
 import io.quarkus.qute.TemplateInstance;
@@ -38,15 +37,19 @@ public class ProductResource {
     BasketCommandHandler basketCommandHandler;
 
     @Inject
-    Template index;
+    Template products;
 
     @GET
     @Path("/")
     public TemplateInstance products() {
-        final Map<String, List<Product>> productToTypeMap = productQuery.list().stream()
-                .collect(Collectors.groupingBy(p -> p.type()));
-        return index.data("menuItem", MenuItem.PRODUCTS)
-                .data("productToTypeMap", productToTypeMap)
+        var productList = productQuery.list().stream()
+                .collect(Collectors.groupingBy(p -> p.type()))
+                .entrySet().stream()
+                .map(e -> new ProductsUI(e.getKey(), e.getValue()))
+                .sorted(Comparator.comparing(ProductsUI::type))
+                .collect(Collectors.toList());
+        return products.data("menuItem", MenuItem.PRODUCTS)
+                .data("productList", productList)
                 .data("username", principal.getName());
     }
 

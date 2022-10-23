@@ -1,4 +1,4 @@
-package cchet.app.microservice.store.store.application.clients;
+package cchet.app.microservice.store.store.products.client;
 
 import java.util.List;
 

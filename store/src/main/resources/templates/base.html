@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Store</title>
+        <link rel="stylesheet" href="/webjars/bootstrap/css/bootstrap.min.css"/>
+        <link rel="stylesheet" href="/webjars/font-awesome/css/fontawesome.min.css"/>  
+        <link rel="stylesheet" href="/webjars/font-awesome/css/solid.css">
+        <link rel="stylesheet" href="/assets/css/style.css">
+        <meta charset="UTF-8">
+    </head>
+    <body>
+        <header>
+         <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+              <a class="navbar-brand" href="/ui/">Store</a>
+              <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+              </button>
+              <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                  {#if username != null}
+                    <li class="nav-item">
+                      <a class="nav-link {#if menuItem.name is 'PRODUCTS'}active{/if}" href="/ui/secured/products">Products</a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link {#if menuItem.name is 'ORDERS'}active{/if}" href="/ui/secured/orders">Orders</a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link {#if menuItem.name is 'BASKET'}active{/if}" href="/ui/secured/basket">Basket</a>
+                    </li>
+                  {/if}
+                </ul>
+                <div class="ms-auto d-flex flex-row align-items-center ">
+                  {#if username != null}
+                    <a href="/ui/logout" class="btn btn-primary">
+                      Logout
+                      <span class="ms-2 fas fa-sign-out"/>
+                    </a>
+                  {#else}
+                    <a href="/ui/secured/products" class="btn btn-primary">
+                      Login
+                      <span class="ms-2 fas fa-sign-in"/>
+                    </a>
+                  {/if}
+                </div>
+              </div>
+            </div>
+          </nav>
+        </header>
+
+        <section class="content-section overflow-auto">
+          {#insert}{/insert}
+        </section>
+
+        <script src="/webjars/bootstrap/js/bootstrap.bundle.min.js"></script>
+        <script src="/webjars/font-awesome/js/fontawesome.min.js"></script>
+    </body>
+</html>

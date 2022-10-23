@@ -1,6 +1,5 @@
-package cchet.app.microservice.store.store;
+package cchet.app.microservice.store.store.orders;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -14,8 +13,9 @@ import javax.ws.rs.WebApplicationException;
 
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
-import cchet.app.microservice.store.store.application.OrderCommandHandler;
-import cchet.app.microservice.store.store.application.OrderQuery;
+import cchet.app.microservice.store.store.MenuItem;
+import cchet.app.microservice.store.store.orders.application.OrderCommandHandler;
+import cchet.app.microservice.store.store.orders.application.OrderQuery;
 import io.quarkus.oidc.IdToken;
 import io.quarkus.qute.Template;
 import io.quarkus.qute.TemplateInstance;
@@ -37,18 +37,19 @@ public class OrderResource {
     OrderCommandHandler orderCommand;
 
     @Inject
-    Template index;
+    Template orders;
 
     @GET
     @Path("/")
     public TemplateInstance orders() {
-        final var orders = orderQuery.list().stream()
+        final var orderList = orderQuery.list().stream()
                 .collect(Collectors.groupingBy(o -> o.state()))
                 .entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (o, n) -> o, LinkedHashMap::new));
-        return index.data("menuItem", MenuItem.ORDERS)
-                .data("orderStateToOrderMap", orders)
+                .map(e -> new OrdersUI(e.getKey(), e.getValue()))
+                .collect(Collectors.toList());
+        return orders.data("menuItem", MenuItem.ORDERS)
+                .data("orderList", orderList)
                 .data("username", principal.getName());
     }
 

@@ -1,0 +1,12 @@
+{@java.lang.String username}
+{#include base}
+  <div class="container d-flex align-items-center flex-column">
+    <img src="/assets/images/store.png" width="40%" alt="Store"/>
+    {#if username != null}
+      <h1>Welcome to the Store</h1>
+      <span class="fs-4">{username}</span>
+    {#else}
+      <h1>Please login to access the store</h1>
+    {/if}
+  </div>
+{/include}

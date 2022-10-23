@@ -1,4 +1,4 @@
-package cchet.app.microservice.store.store.application.clients;
+package cchet.app.microservice.store.store.orders.client;
 
 import java.math.BigDecimal;
 
@@ -13,4 +13,11 @@ public class ItemJson {
 
     @JsonbNumberFormat(value = "#0.00", locale = "en")
     public BigDecimal price;
+
+    public static ItemJson of(String productId, Integer count) {
+        var item = new ItemJson();
+        item.productId = productId;
+        item.count = count;
+        return item;
+    }
 }

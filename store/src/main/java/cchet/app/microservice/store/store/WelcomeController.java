@@ -20,11 +20,11 @@ public class WelcomeController {
     JsonWebToken principal;
 
     @Inject
-    Template index;
+    Template welcome;
 
     @GET
     public TemplateInstance store() {
-        return index.data("menuItem", MenuItem.STORE)
+        return welcome.data("menuItem", MenuItem.STORE)
                 .data("username", principal.getName());
     }
 }

@@ -1,4 +1,4 @@
-package cchet.app.microservice.store.store.application;
+package cchet.app.microservice.store.store.products.application;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -8,9 +8,8 @@ import javax.inject.Inject;
 
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
-import cchet.app.microservice.store.store.application.clients.ProductJson;
-import cchet.app.microservice.store.store.application.clients.ProductResource;
-import cchet.app.microservice.store.store.domain.Product;
+import cchet.app.microservice.store.store.products.client.ProductJson;
+import cchet.app.microservice.store.store.products.client.ProductResource;
 
 @ApplicationScoped
 public class ProductQuery {

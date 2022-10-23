@@ -1,4 +1,4 @@
-package cchet.app.microservice.store.store.application;
+package cchet.app.microservice.store.store.orders.application;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -8,11 +8,8 @@ import javax.inject.Inject;
 
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
-import cchet.app.microservice.store.store.application.clients.ItemJson;
-import cchet.app.microservice.store.store.application.clients.OrderResource;
-import cchet.app.microservice.store.store.domain.Item;
-import cchet.app.microservice.store.store.domain.Order;
-import cchet.app.microservice.store.store.domain.OrderState;
+import cchet.app.microservice.store.store.orders.client.ItemJson;
+import cchet.app.microservice.store.store.orders.client.OrderResource;
 
 @ApplicationScoped
 public class OrderQuery {
@@ -27,9 +24,9 @@ public class OrderQuery {
                 .collect(Collectors.toList());
     }
 
-    private List<Item> itemJsonListToItemList(List<ItemJson> items) {
+    private List<OrderItem> itemJsonListToItemList(List<ItemJson> items) {
         return items.stream()
-                .map(item -> new Item(item.productId, item.count, item.price))
+                .map(item -> new OrderItem(item.productId, item.count, item.price))
                 .collect(Collectors.toList());
     }
 }

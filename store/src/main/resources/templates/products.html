@@ -1,0 +1,34 @@
+{@java.lang.String username}
+{#include base}
+  <div class="container mt-3 mb-3">
+    {#for item in productList}
+      <div class="mt-2">
+        <h2>{item.type}</h2>
+        <ul class="list-group">
+        {#for product in item.products}
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">{product.id} - {product.name}</div>
+              Price: {product.price}&euro;, Tax: {product.taxRate}%
+            </div>
+            <div class="d-flex align-items-center">
+            <span class="badge bg-primary rounded-pill">{product.count} available</span>
+            {#if product.count > 0}
+            <div class="ms-3">
+              <form action="/ui/secured/products" method="POST">
+                <input type="hidden" name="productId" value="{product.id}" />
+                <button type="submit" class="btn btn-primary btn-sm">
+                  <span class="fas fa-plus fa-lg text-light"></span>
+                  Add
+                </button>
+              </form>
+            </div>
+            {/if}
+            </div>
+          </li>
+        {/for}
+        </ul>
+      </div>
+    {/for}
+  </div>
+{/include}

@@ -1,0 +1,47 @@
+
+{#include base}
+<div class="container mt-3 mb-3">
+    {#if orderList.empty == false}
+        {#for orderGroup in orderList}
+        <div class="mt-2">
+        <h2>{orderGroup.state.name()}</h2>
+        <ul class="list-group list-group-numbered">
+        {#for order in orderGroup.orders}
+            <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+                <div class="fw-bold">{order.id}</div>
+                Product count: {order.items.size()}
+                <ul>
+                {#for item in order.items}
+                <li>{item.count}x {item.productId}</li>
+                {/for}
+                </ul>
+                {#if orderGroup.placed}
+                <div class="mt-2">
+                <form action="/ui/secured/orders" method="POST">
+                    <input type="hidden" name="orderId" value="{order.id}" />
+                    <button name="action" value="fulfill" type="submit" class="btn btn-primary btn-sm">
+                    Fulfill
+                    </button>
+                    <button name="action" value="cancel" type="submit" class="btn btn-primary btn-sm">
+                    Cancel
+                    </button>
+                </form>
+                </div>
+            {/if}
+            </div>
+            <div class="badge bg-primary rounded-pill me-2">placed at: {time:format(order.createdAt, dateTimePattern)}</div>
+            <div class="badge bg-primary rounded-pill">{order.price}&euro;</div>
+            </li>
+        {/for}
+        </ul>
+        </div>
+        {/for}
+    {#else}
+        <div class="container d-flex align-items-center flex-column justify-content-center">
+        <img src="/assets/images/empty-bag.png" width="10%" alt="Empty bag"/>
+        <h1>You have no orders yet</h1>
+        </div>
+    {/if}
+</div>  
+{/include}
