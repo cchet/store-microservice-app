@@ -13,8 +13,8 @@ import javax.ws.rs.Path;
 
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
-import cchet.app.microservice.store.store.MenuItem;
 import cchet.app.microservice.store.store.basket.application.BasketCommandHandler;
+import cchet.app.microservice.store.store.global.MenuItem;
 import cchet.app.microservice.store.store.products.application.ProductQuery;
 import io.quarkus.oidc.IdToken;
 import io.quarkus.qute.Template;

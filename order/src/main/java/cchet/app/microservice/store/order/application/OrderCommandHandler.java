@@ -17,10 +17,8 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import cchet.app.microservice.store.order.application.clients.Product;
 import cchet.app.microservice.store.order.application.clients.ProductResource;
-import cchet.app.microservice.store.order.domain.Item;
-import cchet.app.microservice.store.order.domain.Order;
-import cchet.app.microservice.store.order.domain.OrderException;
-import cchet.app.microservice.store.order.domain.TaxCalculator;
+import cchet.app.microservice.store.order.error.OrderException;
+import cchet.app.microservice.store.order.global.TaxCalculator;
 
 @ApplicationScoped
 @Transactional
@@ -44,7 +42,7 @@ public class OrderCommandHandler {
         final var resolvedItems = resolveInvalidAndFillValidOrderItems(items);
 
         if (!resolvedItems.notExistingItems.isEmpty() || !resolvedItems.outOfStockItems.isEmpty()) {
-            throw new OrderException("Canot place order, some items are either out of stock or don't exist",
+            throw new OrderException("Canot place order",
                     resolvedItems.outOfStockItems,
                     resolvedItems.notExistingItems);
         }
@@ -59,7 +57,7 @@ public class OrderCommandHandler {
         final var order = Order.findPlacedOrderForId(id).orElseThrow(() -> new OrderException("Order not found"));
         final var resolvedItems = resolveInvalidAndFillValidOrderItems(order.items);
         if (!resolvedItems.notExistingItems.isEmpty() || !resolvedItems.outOfStockItems.isEmpty()) {
-            throw new OrderException("Canot fulfill order, some items are either out of stock or don't exist",
+            throw new OrderException("Canot fulfill order",
                     resolvedItems.outOfStockItems,
                     resolvedItems.notExistingItems);
         }

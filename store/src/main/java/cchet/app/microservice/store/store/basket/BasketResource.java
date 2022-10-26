@@ -12,9 +12,9 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
 
-import cchet.app.microservice.store.store.MenuItem;
 import cchet.app.microservice.store.store.basket.application.BasketCommandHandler;
 import cchet.app.microservice.store.store.basket.application.BasketQuery;
+import cchet.app.microservice.store.store.global.MenuItem;
 import cchet.app.microservice.store.store.products.application.Product;
 import cchet.app.microservice.store.store.products.application.ProductQuery;
 import io.quarkus.qute.Template;

@@ -1,4 +1,4 @@
-package cchet.app.microservice.store.store.orders.client;
+package cchet.app.microservice.store.store.products.client;
 
 import java.util.HashMap;
 import java.util.List;

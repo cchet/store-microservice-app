@@ -5,10 +5,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import cchet.app.microservice.store.order.domain.Order;
-import cchet.app.microservice.store.order.domain.OrderState;
+import cchet.app.microservice.store.order.application.Order;
+import cchet.app.microservice.store.order.application.OrderState;
 
-public class OrderJson extends ErrorJson {
+public class OrderJson{
     
     public String id;
 

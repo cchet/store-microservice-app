@@ -1,13 +1,10 @@
-package cchet.app.microservice.store.warehouse.application;
+package cchet.app.microservice.store.warehouse.products.application;
 
 import java.util.List;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.Transactional;
-
-import cchet.app.microservice.store.warehouse.domain.Product;
-import cchet.app.microservice.store.warehouse.domain.Type;
 
 @ApplicationScoped
 @Transactional

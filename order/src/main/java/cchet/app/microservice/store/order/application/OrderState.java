@@ -1,4 +1,4 @@
-package cchet.app.microservice.store.order.domain;
+package cchet.app.microservice.store.order.application;
 
 public enum OrderState {
     PLACED,

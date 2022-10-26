@@ -1,8 +1,10 @@
-package cchet.app.microservice.store.warehouse.domain;
+package cchet.app.microservice.store.warehouse.error;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+
+import cchet.app.microservice.store.warehouse.products.application.Product;
 
 public class WarehouseException extends RuntimeException {
     

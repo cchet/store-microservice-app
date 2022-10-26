@@ -1,8 +1,10 @@
-package cchet.app.microservice.store.order.domain;
+package cchet.app.microservice.store.order.error;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+
+import cchet.app.microservice.store.order.application.Item;
 
 public class OrderException extends RuntimeException {
     

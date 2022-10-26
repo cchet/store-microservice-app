@@ -13,7 +13,7 @@ import javax.ws.rs.WebApplicationException;
 
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
-import cchet.app.microservice.store.store.MenuItem;
+import cchet.app.microservice.store.store.global.MenuItem;
 import cchet.app.microservice.store.store.orders.application.OrderCommandHandler;
 import cchet.app.microservice.store.store.orders.application.OrderQuery;
 import io.quarkus.oidc.IdToken;

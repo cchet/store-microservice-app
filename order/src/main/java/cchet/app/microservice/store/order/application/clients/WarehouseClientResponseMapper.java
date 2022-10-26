@@ -5,7 +5,7 @@ import javax.ws.rs.ext.Provider;
 
 import org.eclipse.microprofile.rest.client.ext.ResponseExceptionMapper;
 
-import cchet.app.microservice.store.order.domain.OrderException;
+import cchet.app.microservice.store.order.error.OrderException;
 
 @Provider
 public class WarehouseClientResponseMapper implements ResponseExceptionMapper<OrderException> {

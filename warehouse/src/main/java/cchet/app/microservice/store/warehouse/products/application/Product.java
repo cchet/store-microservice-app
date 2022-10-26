@@ -1,4 +1,4 @@
-package cchet.app.microservice.store.warehouse.domain;
+package cchet.app.microservice.store.warehouse.products.application;
 
 import java.math.BigDecimal;
 

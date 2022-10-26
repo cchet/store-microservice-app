@@ -6,7 +6,7 @@ import java.util.List;
 
 import javax.json.bind.annotation.JsonbNumberFormat;
 
-public class OrderJson extends ErrorJson {
+public class OrderJson {
     
     public String id;
 

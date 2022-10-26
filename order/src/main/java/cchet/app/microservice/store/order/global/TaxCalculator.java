@@ -1,4 +1,4 @@
-package cchet.app.microservice.store.order.domain;
+package cchet.app.microservice.store.order.global;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

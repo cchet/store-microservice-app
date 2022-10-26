@@ -1,0 +1,23 @@
+
+{#include base}
+<div class="container mt-3">
+    <div class="d-flex flex-column justify-content-center h-100 text-center">
+        <h1>Ops.. something went wrong</h1>
+        <div>
+            <div class="text-center my-3">
+                <span class="fas fa-exclamation-triangle fa-10x" style="color: red;"></span>
+            </div>
+            <div class="fs-5 my-2">{ui.errorMessage}</div>
+        </div>
+        {#if !ui.errorItems.empty}
+            <hr/>
+            {#for errorItem in ui.errorItems}
+            <h3>{errorItem.type}</h3>
+            {#for error in errorItem.errors}
+                <div>{error}</div>
+            {/for}
+            {/for}
+        {/if}
+    </div>
+</div>
+{/include}

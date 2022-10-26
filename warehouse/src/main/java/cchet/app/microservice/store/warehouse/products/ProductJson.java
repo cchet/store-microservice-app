@@ -1,10 +1,10 @@
-package cchet.app.microservice.store.warehouse;
+package cchet.app.microservice.store.warehouse.products;
 
 import java.math.BigDecimal;
 
 import javax.json.bind.annotation.JsonbNumberFormat;
 
-import cchet.app.microservice.store.warehouse.domain.Product;
+import cchet.app.microservice.store.warehouse.products.application.Product;
 
 public class ProductJson {
 

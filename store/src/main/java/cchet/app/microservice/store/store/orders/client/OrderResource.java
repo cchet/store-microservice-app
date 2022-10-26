@@ -2,6 +2,7 @@ package cchet.app.microservice.store.store.orders.client;
 
 import java.util.List;
 
+import java.time.temporal.ChronoUnit;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.Consumes;
@@ -12,6 +13,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import org.eclipse.microprofile.faulttolerance.Retry;
+import org.eclipse.microprofile.faulttolerance.Timeout;
 import org.eclipse.microprofile.rest.client.annotation.RegisterProvider;
 import org.eclipse.microprofile.rest.client.annotation.RegisterProviders;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
@@ -20,9 +23,12 @@ import io.quarkus.oidc.token.propagation.JsonWebTokenRequestFilter;
 
 @RegisterRestClient(configKey = "order")
 @RegisterProviders({
-    @RegisterProvider(JsonWebTokenRequestFilter.class)
+    @RegisterProvider(JsonWebTokenRequestFilter.class),
+    @RegisterProvider(OrderClientResponseMapper.class)
 })
 @Path("/order")
+@Timeout(value = 2, unit = ChronoUnit.SECONDS)
+@Retry(maxRetries = 3, delay = 100)
 public interface OrderResource {
 
     @GET

@@ -1,4 +1,4 @@
-package cchet.app.microservice.store.warehouse;
+package cchet.app.microservice.store.warehouse.products;
 
 import java.util.List;
 import java.util.Map;
@@ -24,9 +24,10 @@ import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement
 import org.jboss.resteasy.reactive.RestResponse;
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 
-import cchet.app.microservice.store.warehouse.application.ProductCommandHandler;
-import cchet.app.microservice.store.warehouse.application.ProductQuery;
-import cchet.app.microservice.store.warehouse.domain.Type;
+import cchet.app.microservice.store.warehouse.error.ErrorJson;
+import cchet.app.microservice.store.warehouse.products.application.ProductCommandHandler;
+import cchet.app.microservice.store.warehouse.products.application.ProductQuery;
+import cchet.app.microservice.store.warehouse.products.application.Type;
 import io.quarkus.security.Authenticated;
 import io.smallrye.common.constraint.NotNull;
 
@@ -97,10 +98,10 @@ public class ProductResource {
 
     @ServerExceptionMapper
     RestResponse<ErrorJson> mapException(ConstraintViolationException e) {
-        final ErrorJson errorModel = new ErrorJson();
-        errorModel.messages = e.getConstraintViolations().stream()
+        var errors = e.getConstraintViolations().stream()
                 .map(ConstraintViolation::getMessage)
-                .collect(Collectors.joining(", "));
+                .collect(Collectors.toList());
+        final ErrorJson errorModel = new ErrorJson("Contraints violated", Map.of("Violations", errors));
         return RestResponse.status(Response.Status.BAD_REQUEST, errorModel);
     }
 }

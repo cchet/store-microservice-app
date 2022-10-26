@@ -8,7 +8,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import cchet.app.microservice.store.order.domain.Item;
+import cchet.app.microservice.store.order.application.Item;
 
 public class ItemJson {
     

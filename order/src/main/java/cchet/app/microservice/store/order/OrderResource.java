@@ -17,10 +17,10 @@ import javax.ws.rs.core.MediaType;
 
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 
+import cchet.app.microservice.store.order.application.Item;
+import cchet.app.microservice.store.order.application.Order;
 import cchet.app.microservice.store.order.application.OrderCommandHandler;
 import cchet.app.microservice.store.order.application.OrderQuery;
-import cchet.app.microservice.store.order.domain.Item;
-import cchet.app.microservice.store.order.domain.Order;
 import io.quarkus.security.Authenticated;
 
 @RequestScoped

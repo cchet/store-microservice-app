@@ -1,4 +1,4 @@
-package cchet.app.microservice.store.store;
+package cchet.app.microservice.store.store.global;
 
 import io.quarkus.qute.TemplateGlobal;
 

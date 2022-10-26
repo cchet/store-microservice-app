@@ -1,4 +1,4 @@
-package cchet.app.microservice.store.order.domain;
+package cchet.app.microservice.store.order.application;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

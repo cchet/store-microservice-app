@@ -1,9 +1,9 @@
-package cchet.app.microservice.store.store;
+package cchet.app.microservice.store.store.global;
 
 import java.util.Optional;
 
 public enum MenuItem {
-    STORE,
+    WELCOME,
     PRODUCTS,
     ORDERS,
     BASKET;

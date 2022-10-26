@@ -9,8 +9,6 @@ import javax.transaction.Transactional;
 import org.eclipse.microprofile.jwt.Claim;
 import org.eclipse.microprofile.jwt.Claims;
 
-import cchet.app.microservice.store.order.domain.Order;
-
 @ApplicationScoped
 @Transactional
 public class OrderQuery {
