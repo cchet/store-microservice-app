@@ -19,6 +19,8 @@ import cchet.app.microservice.store.order.application.clients.Product;
 import cchet.app.microservice.store.order.application.clients.ProductResource;
 import cchet.app.microservice.store.order.error.OrderException;
 import cchet.app.microservice.store.order.global.TaxCalculator;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.extension.annotations.WithSpan;
 
 @ApplicationScoped
 @Transactional
@@ -38,6 +40,7 @@ public class OrderCommandHandler {
     @RestClient
     ProductResource productClient;
 
+    @WithSpan(kind = SpanKind.INTERNAL)
     public Order placeOrder(final List<Item> items) {
         final var resolvedItems = resolveInvalidAndFillValidOrderItems(items);
 
@@ -53,6 +56,7 @@ public class OrderCommandHandler {
         return order;
     }
 
+    @WithSpan(kind = SpanKind.INTERNAL)
     public Order fulfill(final String id) {
         final var order = Order.findPlacedOrderForId(id).orElseThrow(() -> new OrderException("Order not found"));
         final var resolvedItems = resolveInvalidAndFillValidOrderItems(order.items);
@@ -69,6 +73,7 @@ public class OrderCommandHandler {
         return order;
     }
 
+    @WithSpan(kind = SpanKind.INTERNAL)
     public Order cancel(final String id) {
         final var order = Order.findPlacedOrderForId(id).orElseThrow(() -> new OrderException("Order not found"));
         order.cancel();

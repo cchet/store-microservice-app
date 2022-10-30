@@ -10,6 +10,8 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import cchet.app.microservice.store.store.products.client.ProductJson;
 import cchet.app.microservice.store.store.products.client.ProductResource;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.extension.annotations.WithSpan;
 
 @ApplicationScoped
 public class ProductQuery {
@@ -18,11 +20,14 @@ public class ProductQuery {
     @RestClient
     ProductResource warehouseClient;
 
+    @WithSpan(kind = SpanKind.INTERNAL)
     public List<Product> list() {
         return warehouseClient.list().stream()
                 .map(this::toProduct)
                 .collect(Collectors.toList());
     }
+
+    @WithSpan(kind = SpanKind.INTERNAL)
     public List<Product> listByProductIds(List<String> productIds) {
         return warehouseClient.findByIds(productIds).stream()
                 .map(this::toProduct)

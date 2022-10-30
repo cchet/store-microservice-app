@@ -16,6 +16,8 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 import cchet.app.microservice.store.store.basket.application.BasketCommandHandler;
 import cchet.app.microservice.store.store.global.MenuItem;
 import cchet.app.microservice.store.store.products.application.ProductQuery;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.extension.annotations.WithSpan;
 import io.quarkus.oidc.IdToken;
 import io.quarkus.qute.Template;
 import io.quarkus.qute.TemplateInstance;
@@ -41,6 +43,7 @@ public class ProductResource {
 
     @GET
     @Path("/")
+    @WithSpan(kind = SpanKind.SERVER)
     public TemplateInstance products() {
         var productList = productQuery.list().stream()
                 .collect(Collectors.groupingBy(p -> p.type()))
@@ -55,6 +58,7 @@ public class ProductResource {
 
     @POST
     @Path("/")
+    @WithSpan(kind = SpanKind.SERVER)
     public TemplateInstance get(@FormParam("productId") @NotEmpty String productId) {
         basketCommandHandler.addProduct(productId);
         return products();

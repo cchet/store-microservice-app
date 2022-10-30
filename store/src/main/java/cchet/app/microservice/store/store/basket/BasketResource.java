@@ -17,6 +17,8 @@ import cchet.app.microservice.store.store.basket.application.BasketQuery;
 import cchet.app.microservice.store.store.global.MenuItem;
 import cchet.app.microservice.store.store.products.application.Product;
 import cchet.app.microservice.store.store.products.application.ProductQuery;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.extension.annotations.WithSpan;
 import io.quarkus.qute.Template;
 import io.quarkus.qute.TemplateInstance;
 import io.quarkus.security.Authenticated;
@@ -40,6 +42,7 @@ public class BasketResource {
 
     @GET
     @Path("/")
+    @WithSpan(kind = SpanKind.SERVER)
     public TemplateInstance get() {
         var userBasket = basketQuery.findForLoggedUserOrNew();
         var productIds = userBasket.items.stream().map(i -> i.productId).collect(Collectors.toList());
@@ -60,6 +63,7 @@ public class BasketResource {
 
     @POST
     @Path("/")
+    @WithSpan(kind = SpanKind.SERVER)
     public TemplateInstance action(@FormParam("productId") String productId, @FormParam("action") String action) {
         switch (action) {
             case "removeItem" -> basketCommandHandler.removeItem(productId);

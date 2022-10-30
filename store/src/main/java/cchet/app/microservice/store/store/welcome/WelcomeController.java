@@ -8,6 +8,8 @@ import javax.ws.rs.Path;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import cchet.app.microservice.store.store.global.MenuItem;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.extension.annotations.WithSpan;
 import io.quarkus.oidc.IdToken;
 import io.quarkus.qute.Template;
 import io.quarkus.qute.TemplateInstance;
@@ -24,6 +26,7 @@ public class WelcomeController {
     Template welcome;
 
     @GET
+    @WithSpan(kind = SpanKind.SERVER)
     public TemplateInstance store() {
         return welcome.data("menuItem", MenuItem.WELCOME)
                 .data("username", principal.getName());

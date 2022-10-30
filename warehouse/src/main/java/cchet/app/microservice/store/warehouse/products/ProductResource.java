@@ -28,6 +28,8 @@ import cchet.app.microservice.store.warehouse.error.ErrorJson;
 import cchet.app.microservice.store.warehouse.products.application.ProductCommandHandler;
 import cchet.app.microservice.store.warehouse.products.application.ProductQuery;
 import cchet.app.microservice.store.warehouse.products.application.Type;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.extension.annotations.WithSpan;
 import io.quarkus.security.Authenticated;
 import io.smallrye.common.constraint.NotNull;
 
@@ -46,6 +48,7 @@ public class ProductResource {
     @GET
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
+    @WithSpan(kind = SpanKind.SERVER)
     public List<ProductJson> list() {
         return query.list().stream().map(ProductJson::new).collect(Collectors.toList());
     }
@@ -53,6 +56,7 @@ public class ProductResource {
     @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
+    @WithSpan(kind = SpanKind.SERVER)
     public ProductJson find(@NotEmpty @PathParam("id") final String id) {
         return query.findById(id)
                 .map(ProductJson::new)
@@ -63,6 +67,7 @@ public class ProductResource {
     @Path("/search/id")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @WithSpan(kind = SpanKind.SERVER)
     public List<ProductJson> findByIds(@NotEmpty final List<String> ids) {
         return query.findByIds(ids)
                 .stream()
@@ -73,6 +78,7 @@ public class ProductResource {
     @GET
     @Path("/search/type/{type}")
     @Produces(MediaType.APPLICATION_JSON)
+    @WithSpan(kind = SpanKind.SERVER)
     public List<ProductJson> findForType(@PathParam("type") @NotNull final Type type) {
         return query.findByType(type).stream()
                 .map(ProductJson::new)
@@ -82,6 +88,7 @@ public class ProductResource {
     @POST
     @Path("/pull")
     @Produces(MediaType.APPLICATION_JSON)
+    @WithSpan(kind = SpanKind.SERVER)
     public void pull(@NotEmpty final Map<String, Integer> idWIthCount) {
         commandHandler.pull(idWIthCount);
     }
@@ -89,6 +96,7 @@ public class ProductResource {
     @POST
     @Path("/push/{id}/{count}")
     @Produces(MediaType.APPLICATION_JSON)
+    @WithSpan(kind = SpanKind.SERVER)
     public ProductJson push(@NotEmpty @PathParam("id") final String id,
             @NotNull @Min(1) @PathParam("count") final Integer count) {
         return commandHandler.push(id, count)

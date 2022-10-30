@@ -9,11 +9,14 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.Transactional;
 
 import cchet.app.microservice.store.warehouse.error.WarehouseException;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.extension.annotations.WithSpan;
 
 @ApplicationScoped
 @Transactional
 public class ProductCommandHandler {
 
+    @WithSpan(kind = SpanKind.INTERNAL)
     public void pull(final Map<String, Integer> idWIthCount) {
         final List<Product> products = Product.find("id in(?1)", idWIthCount.keySet()).list();
         final var invalidProducts = new LinkedList<Product>();
@@ -30,6 +33,7 @@ public class ProductCommandHandler {
         }
     }
 
+    @WithSpan(kind = SpanKind.INTERNAL)
     public Optional<Product> push(final String id, final int count) {
         final Optional<Product> productOptional = Product.findByIdOptional(id);
         productOptional.ifPresent(p -> p.count += count);

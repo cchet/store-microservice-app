@@ -21,6 +21,8 @@ import cchet.app.microservice.store.order.application.Item;
 import cchet.app.microservice.store.order.application.Order;
 import cchet.app.microservice.store.order.application.OrderCommandHandler;
 import cchet.app.microservice.store.order.application.OrderQuery;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.extension.annotations.WithSpan;
 import io.quarkus.security.Authenticated;
 
 @RequestScoped
@@ -39,6 +41,7 @@ public class OrderResource {
     @Path("/")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @WithSpan(kind = SpanKind.SERVER)
     public List<OrderJson> list() {
         return query.list().stream().map(OrderJson::new).collect(Collectors.toList());
     }
@@ -47,6 +50,7 @@ public class OrderResource {
     @Path("/place")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @WithSpan(kind = SpanKind.SERVER)
     public OrderJson place(@NotEmpty @Valid List<ItemJson> items) {
         final List<Item> itemsDomain = items.stream().map(i -> Item.of(i.productId, i.count))
                 .collect(Collectors.toList());
@@ -58,6 +62,7 @@ public class OrderResource {
     @Path("/fulfill/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @WithSpan(kind = SpanKind.SERVER)
     public OrderJson fulfill(@NotEmpty @PathParam("id") String id) {
         final Order order = commandHandler.fulfill(id);
         return new OrderJson(order);
@@ -67,6 +72,7 @@ public class OrderResource {
     @Path("/cancel/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @WithSpan(kind = SpanKind.SERVER)
     public OrderJson cancel(@NotEmpty @PathParam("id") String id) {
         final Order order = commandHandler.cancel(id);
         return new OrderJson(order);

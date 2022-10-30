@@ -6,46 +6,51 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
-import org.eclipse.microprofile.jwt.Claim;
-import org.eclipse.microprofile.jwt.Claims;
+import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import cchet.app.microservice.store.store.orders.application.OrderCommandHandler;
 import cchet.app.microservice.store.store.orders.application.OrderItem;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.extension.annotations.WithSpan;
 
 @ApplicationScoped
 @Transactional
 public class BasketCommandHandler {
 
     @Inject
-    @Claim(standard = Claims.upn)
-    String username;
+    JsonWebToken token;
 
     @Inject
     OrderCommandHandler orderCommandHandler;
 
-    public void placeOrder(){
-        var basket = Basket.<Basket>findByIdOptional(username).orElse(null);
-        var orderItems = basket.items.stream().map(i -> new OrderItem(i.productId, i.count, null)).collect(Collectors.toList());
+    @WithSpan(kind = SpanKind.INTERNAL)
+    public void placeOrder() {
+        var basket = Basket.<Basket>findByIdOptional(token.getName()).orElse(null);
+        var orderItems = basket.items.stream().map(i -> new OrderItem(i.productId, i.count, null))
+                .collect(Collectors.toList());
         orderCommandHandler.place(orderItems);
         basket.delete();
     }
 
+    @WithSpan(kind = SpanKind.INTERNAL)
     public Basket removeItem(String productId) {
-        final var basket = Basket.<Basket>findByIdOptional(username)
-                .orElseThrow(() -> new IllegalArgumentException("No basket for user '" + username + "' found"));
+        final var basket = Basket.<Basket>findByIdOptional(token.getName())
+                .orElseThrow(() -> new IllegalArgumentException("No basket for user '" + token.getName() + "' found"));
         basket.removeProductItem(productId);
         return basket;
     }
 
+    @WithSpan(kind = SpanKind.INTERNAL)
     public Basket remove(String productId) {
-        final var basket = Basket.<Basket>findByIdOptional(username)
-                .orElseThrow(() -> new IllegalArgumentException("No basket for user '" + username + "' found"));
+        final var basket = Basket.<Basket>findByIdOptional(token.getName())
+                .orElseThrow(() -> new IllegalArgumentException("No basket for user '" + token.getName() + "' found"));
         basket.removeProduct(productId);
         return basket;
     }
 
+    @WithSpan(kind = SpanKind.INTERNAL)
     public Basket addProduct(String productId) {
-        final var basket = Basket.<Basket>findByIdOptional(username).orElse(Basket.newForUser(username));
+        final var basket = Basket.<Basket>findByIdOptional(token.getName()).orElse(Basket.newForUser(token.getName()));
 
         if (!basket.isPersistent()) {
             basket.addItem(BasketItem.newItem(productId, 1));

@@ -16,6 +16,8 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 import cchet.app.microservice.store.store.global.MenuItem;
 import cchet.app.microservice.store.store.orders.application.OrderCommandHandler;
 import cchet.app.microservice.store.store.orders.application.OrderQuery;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.extension.annotations.WithSpan;
 import io.quarkus.oidc.IdToken;
 import io.quarkus.qute.Template;
 import io.quarkus.qute.TemplateInstance;
@@ -41,6 +43,7 @@ public class OrderResource {
 
     @GET
     @Path("/")
+    @WithSpan(kind = SpanKind.SERVER)
     public TemplateInstance orders() {
         final var orderList = orderQuery.list().stream()
                 .collect(Collectors.groupingBy(o -> o.state()))
@@ -55,6 +58,7 @@ public class OrderResource {
 
     @POST
     @Path("/")
+    @WithSpan(kind = SpanKind.SERVER)
     public TemplateInstance action(@FormParam("orderId") String orderId, @FormParam("action") String action) {
         switch (action) {
             case "fulfill" -> orderCommand.fulfill(orderId);

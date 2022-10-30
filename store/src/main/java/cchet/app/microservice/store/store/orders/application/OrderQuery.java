@@ -10,6 +10,8 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import cchet.app.microservice.store.store.orders.client.ItemJson;
 import cchet.app.microservice.store.store.orders.client.OrderResource;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.extension.annotations.WithSpan;
 
 @ApplicationScoped
 public class OrderQuery {
@@ -18,6 +20,7 @@ public class OrderQuery {
     @RestClient
     OrderResource orderClient;
 
+    @WithSpan(kind = SpanKind.INTERNAL)
     public List<Order> list() {
         return orderClient.list().stream()
                 .map(o -> new Order(o.id, OrderState.valueOf(o.state), o.price, o.createAt, itemJsonListToItemList(o.items)))

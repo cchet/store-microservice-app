@@ -15,10 +15,14 @@ import javax.ws.rs.core.MediaType;
 
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.faulttolerance.Timeout;
+import org.eclipse.microprofile.rest.client.annotation.RegisterClientHeaders;
 import org.eclipse.microprofile.rest.client.annotation.RegisterProvider;
 import org.eclipse.microprofile.rest.client.annotation.RegisterProviders;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
+import cchet.app.microservice.store.store.global.ClientHeaderFactory;
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.extension.annotations.WithSpan;
 import io.quarkus.oidc.token.propagation.JsonWebTokenRequestFilter;
 
 @RegisterRestClient(configKey = "order")
@@ -26,6 +30,7 @@ import io.quarkus.oidc.token.propagation.JsonWebTokenRequestFilter;
     @RegisterProvider(JsonWebTokenRequestFilter.class),
     @RegisterProvider(OrderClientResponseMapper.class)
 })
+@RegisterClientHeaders(ClientHeaderFactory.class)
 @Path("/order")
 @Timeout(value = 2, unit = ChronoUnit.SECONDS)
 @Retry(maxRetries = 3, delay = 100)
@@ -35,23 +40,27 @@ public interface OrderResource {
     @Path("/")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @WithSpan(kind = SpanKind.CLIENT)
     public List<OrderJson> list();
 
     @POST
     @Path("/place")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @WithSpan(kind = SpanKind.CLIENT)
     public OrderJson place(@NotEmpty @Valid List<ItemJson> items);
 
     @POST
     @Path("/fulfill/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @WithSpan(kind = SpanKind.CLIENT)
     public OrderJson fulfill(@NotEmpty @PathParam("id") String id);
     
     @POST
     @Path("/cancel/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @WithSpan(kind = SpanKind.CLIENT)
     public OrderJson cancel(@NotEmpty @PathParam("id") String id);
 }

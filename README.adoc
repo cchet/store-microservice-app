@@ -3,7 +3,7 @@
 
 This application has been created on the one hand for praticing Quarkus for the Red Hat Certification Cloud-Native-Developer (EX378) and on the other hand for practicing Istio in a Kubernetes environment with a fairly complex application which consists of multiple services and their relating database and a sso server. +
 
-This application runs on the local host with a Docker-Compose infrastructure providing the database instances for the services an a sso service instance. When running locally then the services use https because part of the certification is to secure Quarkus services and rest-clients.
+This application runs on the local host with a Docker-Compose infrastructure providing the database instances for the services and a sso service instance. When running locally then the services use https because part of the certification is to secure Quarkus services and rest-clients.
 
 This application runs also on Kubernetes where the services use http, and those services exposed are secured by the ingress controler with TLS termination.
 
@@ -128,6 +128,8 @@ link:https://localhost:8444/q/swagger-ui[https://localhost:8444/q/swagger-ui]
 link:https://localhost:8445/q/swagger-ui[https://localhost:8445/q/swagger-ui]
 . `sso` +
 link:https://localhost:9443[https://localhost:9443]
+. `jaeger (Display tracing data)` +
+link:http://localhost:16686/search[http://localhost:16686/search]
 
 The services deployed to Kubernetes can be accessed via:
 

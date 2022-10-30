@@ -7,6 +7,9 @@ import javax.transaction.Transactional;
 import org.eclipse.microprofile.jwt.Claim;
 import org.eclipse.microprofile.jwt.Claims;
 
+import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.extension.annotations.WithSpan;
+
 @ApplicationScoped
 @Transactional
 public class BasketQuery {
@@ -15,6 +18,7 @@ public class BasketQuery {
     @Claim(standard = Claims.upn)
     String username;
 
+    @WithSpan(kind = SpanKind.INTERNAL)
     public Basket findForLoggedUserOrNew() {
         return Basket.<Basket>findByIdOptional(username).orElseGet(() -> Basket.newForUser(username));
     }
