@@ -168,3 +168,8 @@ This will export the realm and users in the project directory `infrastructure/co
 The realm and user export need to be merged, because only the realm is imported during startup and therefore we would miss the users.
 
 The client secrets must be set as `client-secret-<SERVICE_NAME>` e.g. `client-secret-order` which are used for local deployments and are replaced with a dynamically generated secret when deployed to Kubernetes.
+
+=== Grafana
+
+When the dashboard gets modified it needs to be exported via the GUI either by copy-paste or downloa the json file. +
+The exported json needs to be set in the file `infrastructure/compose/grafana/dashboards/store-dashboard.json`. +
