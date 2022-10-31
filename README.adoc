@@ -97,7 +97,7 @@ This command can be used to build the container images, which are pushed to your
 [source,bash]
 ----
 quarkus build \
-  -D quarkus.container-image.build=true
+  -D quakrus.profile=container \
   -D quarkus.container-image.group=<YOUR_DOCKER_HUB_USERNAME>
 ----
 
@@ -110,7 +110,7 @@ The service can be build and deployed via the following command executed in the 
 [source,bash]
 ----
 quarkus build \
-  -D quakrus.profile=k8s
+  -D quakrus.profile=k8s,container \
   -D quarkus.container-image.group=<YOUR_DOCKER_HUB_USERNAME>
 ----
 
