@@ -70,7 +70,6 @@ public class ProductResource {
     @WithSpan(kind = SpanKind.SERVER)
     public TemplateInstance get(@FormParam("productId") @NotEmpty String productId) {
         basketCommandHandler.addProduct(productId);
-        meterRegistry.counter("basket_products_added", List.of(Tag.of("user", principal.getName()))).increment();
         return products();
     }
 }

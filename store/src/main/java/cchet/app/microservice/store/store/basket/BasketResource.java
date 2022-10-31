@@ -2,7 +2,6 @@ package cchet.app.microservice.store.store.basket;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.RequestScoped;
@@ -15,7 +14,6 @@ import javax.ws.rs.WebApplicationException;
 
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
-import cchet.app.microservice.store.store.basket.application.Basket;
 import cchet.app.microservice.store.store.basket.application.BasketCommandHandler;
 import cchet.app.microservice.store.store.basket.application.BasketQuery;
 import cchet.app.microservice.store.store.global.MenuItem;
@@ -82,25 +80,15 @@ public class BasketResource {
     @Path("/")
     @WithSpan(kind = SpanKind.SERVER)
     public TemplateInstance action(@FormParam("productId") String productId, @FormParam("action") String action) {
-        Basket basket = null;
         switch (action) {
-            case "removeItem" -> {
-                basket = basketCommandHandler.removeItem(productId);
-            }
-            case "remove" -> {
-                basket = basketCommandHandler.remove(productId);
-            }
+            case "removeItem" -> basketCommandHandler.removeItem(productId);
+            case "remove" -> basketCommandHandler.remove(productId);
             case "placeOrder" -> {
                 basketCommandHandler.placeOrder();
                 meterRegistry.counter("orders_placed", List.of(Tag.of("user", principal.getName())))
                         .increment();
             }
             default -> throw new WebApplicationException("Action not supported. action: " + action);
-        }
-        if (basket != null) {
-            basket.items.forEach(i -> meterRegistry.gauge("basket_current_products",
-                    List.of(Tag.of("productId", i.productId), Tag.of("user", principal.getName())),
-                    i.count));
         }
         return get();
     }

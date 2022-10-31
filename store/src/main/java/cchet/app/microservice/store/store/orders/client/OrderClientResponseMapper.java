@@ -18,7 +18,7 @@ import io.micrometer.core.instrument.Tag;
 public class OrderClientResponseMapper implements ResponseExceptionMapper<StoreException> {
 
     @Inject
-    private MeterRegistry meterRegistry;
+    MeterRegistry meterRegistry;
 
     @Inject
     JsonWebToken token;
