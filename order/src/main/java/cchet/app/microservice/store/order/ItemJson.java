@@ -26,8 +26,8 @@ public class ItemJson {
     @JsonbNumberFormat(value = "#0.00", locale = "en")
     public BigDecimal rabat;
 
-    
-    private ItemJson(String productId, Integer count) {
+    @JsonbCreator
+    public ItemJson(String productId, Integer count) {
         this.productId = productId;
         this.count = count;
     }
@@ -39,7 +39,6 @@ public class ItemJson {
         this.rabat = item.rabat;
     }
 
-    @JsonbCreator
     public static ItemJson of(final String productId, final Integer count) {
         return new ItemJson(productId, count);
     }

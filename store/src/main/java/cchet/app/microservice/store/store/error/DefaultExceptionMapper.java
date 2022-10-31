@@ -18,6 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cchet.app.microservice.store.store.global.MenuItem;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tag;
 import io.quarkus.oidc.IdToken;
 import io.quarkus.qute.Template;
 
@@ -36,6 +38,9 @@ public class DefaultExceptionMapper implements ExceptionMapper<Throwable> {
     @Context
     UriInfo uriInfo;
 
+    @Inject
+    MeterRegistry meterRegistry;
+
     @Override
     public Response toResponse(Throwable exception) {
         log.error("Endpoint '{}' failed with error: {}#{} ",
@@ -45,12 +50,18 @@ public class DefaultExceptionMapper implements ExceptionMapper<Throwable> {
 
         final var responseBuilder = responseBuilderForExceptionOrDefault(exception);
         final var errorUI = errorUIForException(exception);
+        var menuItem = menuItemForPath();
 
         var errorPage = error.data("username", principal.getName())
-                .data("menuItem", menuItemForPath())
+                .data("menuItem", menuItem)
                 .data("ui", errorUI)
                 .render();
-
+        meterRegistry.counter("page_viewed",
+                List.of(Tag.of("user", principal.getName()), Tag.of("page", "ERROR")))
+                .increment();
+        meterRegistry.counter("page_error",
+                List.of(Tag.of("page", menuItem.name()), Tag.of("user", principal.getName())))
+                .increment();
         return responseBuilder
                 .type(MediaType.TEXT_HTML)
                 .entity(errorPage)

@@ -2,6 +2,7 @@ package cchet.app.microservice.store.store.basket;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.RequestScoped;
@@ -12,13 +13,19 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
 
+import org.eclipse.microprofile.jwt.JsonWebToken;
+
+import cchet.app.microservice.store.store.basket.application.Basket;
 import cchet.app.microservice.store.store.basket.application.BasketCommandHandler;
 import cchet.app.microservice.store.store.basket.application.BasketQuery;
 import cchet.app.microservice.store.store.global.MenuItem;
 import cchet.app.microservice.store.store.products.application.Product;
 import cchet.app.microservice.store.store.products.application.ProductQuery;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tag;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.extension.annotations.WithSpan;
+import io.quarkus.oidc.IdToken;
 import io.quarkus.qute.Template;
 import io.quarkus.qute.TemplateInstance;
 import io.quarkus.security.Authenticated;
@@ -27,6 +34,10 @@ import io.quarkus.security.Authenticated;
 @Path("/secured/basket")
 @Authenticated
 public class BasketResource {
+
+    @Inject
+    @IdToken
+    JsonWebToken principal;
 
     @Inject
     Template basket;
@@ -39,6 +50,9 @@ public class BasketResource {
 
     @Inject
     ProductQuery productQuery;
+
+    @Inject
+    MeterRegistry meterRegistry;
 
     @GET
     @Path("/")
@@ -55,6 +69,9 @@ public class BasketResource {
                     .sorted(Comparator.comparing(ProductUI::type))
                     .collect(Collectors.toList());
         }
+        meterRegistry.counter("page_viewed",
+                List.of(Tag.of("user", principal.getName()), Tag.of("page", MenuItem.BASKET.name())))
+                .increment();
         return basket
                 .data("username", userBasket.username)
                 .data("menuItem", MenuItem.BASKET)
@@ -65,11 +82,25 @@ public class BasketResource {
     @Path("/")
     @WithSpan(kind = SpanKind.SERVER)
     public TemplateInstance action(@FormParam("productId") String productId, @FormParam("action") String action) {
+        Basket basket = null;
         switch (action) {
-            case "removeItem" -> basketCommandHandler.removeItem(productId);
-            case "remove" -> basketCommandHandler.remove(productId);
-            case "placeOrder" -> basketCommandHandler.placeOrder();
+            case "removeItem" -> {
+                basket = basketCommandHandler.removeItem(productId);
+            }
+            case "remove" -> {
+                basket = basketCommandHandler.remove(productId);
+            }
+            case "placeOrder" -> {
+                basketCommandHandler.placeOrder();
+                meterRegistry.counter("orders_placed", List.of(Tag.of("user", principal.getName())))
+                        .increment();
+            }
             default -> throw new WebApplicationException("Action not supported. action: " + action);
+        }
+        if (basket != null) {
+            basket.items.forEach(i -> meterRegistry.gauge("basket_current_products",
+                    List.of(Tag.of("productId", i.productId), Tag.of("user", principal.getName())),
+                    i.count));
         }
         return get();
     }

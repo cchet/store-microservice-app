@@ -1,6 +1,7 @@
 package cchet.app.microservice.store.store.products;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.RequestScoped;
@@ -16,6 +17,8 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 import cchet.app.microservice.store.store.basket.application.BasketCommandHandler;
 import cchet.app.microservice.store.store.global.MenuItem;
 import cchet.app.microservice.store.store.products.application.ProductQuery;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tag;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.extension.annotations.WithSpan;
 import io.quarkus.oidc.IdToken;
@@ -41,6 +44,9 @@ public class ProductResource {
     @Inject
     Template products;
 
+    @Inject
+    MeterRegistry meterRegistry;
+
     @GET
     @Path("/")
     @WithSpan(kind = SpanKind.SERVER)
@@ -51,6 +57,9 @@ public class ProductResource {
                 .map(e -> new ProductsUI(e.getKey(), e.getValue()))
                 .sorted(Comparator.comparing(ProductsUI::type))
                 .collect(Collectors.toList());
+        meterRegistry.counter("page_viewed",
+                List.of(Tag.of("user", principal.getName()), Tag.of("page", MenuItem.PRODUCTS.name())))
+                .increment();
         return products.data("menuItem", MenuItem.PRODUCTS)
                 .data("productList", productList)
                 .data("username", principal.getName());
@@ -61,6 +70,7 @@ public class ProductResource {
     @WithSpan(kind = SpanKind.SERVER)
     public TemplateInstance get(@FormParam("productId") @NotEmpty String productId) {
         basketCommandHandler.addProduct(productId);
+        meterRegistry.counter("basket_products_added", List.of(Tag.of("user", principal.getName()))).increment();
         return products();
     }
 }

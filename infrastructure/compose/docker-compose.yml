@@ -1,4 +1,4 @@
-version: '3.1'
+version: '3.8'
 
 services:
   store-db:
@@ -9,6 +9,8 @@ services:
       POSTGRES_USER: store
       POSTGRES_PASSWORD: store
       POSTGRES_DB: store
+    cpus: 0.5
+    mem_limit: "100M"
   order-db:
     image: postgres:bullseye
     ports:
@@ -17,6 +19,8 @@ services:
       POSTGRES_USER: order
       POSTGRES_PASSWORD: order
       POSTGRES_DB: order
+    cpus: 0.5
+    mem_limit: "100M"
   warehouse-db:
     image: postgres:bullseye
     ports:
@@ -25,6 +29,8 @@ services:
       POSTGRES_USER: warehouse
       POSTGRES_PASSWORD: warehouse
       POSTGRES_DB: warehouse
+    cpus: 0.5
+    mem_limit: "100M"
   sso-db:
     image: postgres:bullseye
     restart: always
@@ -32,6 +38,8 @@ services:
       POSTGRES_USER: sso
       POSTGRES_PASSWORD: sso
       POSTGRES_DB: sso
+    cpus: 0.5
+    mem_limit: "100M"
   sso:
     image: quay.io/keycloak/keycloak:19.0.2
     ports:
@@ -53,6 +61,8 @@ services:
       - ../../secrets/sso.p12:/secret/sso.p12:ro
       - ../../secrets/truststore.p12:/secret/truststore.p12:ro
       - ./keycloak/export:/opt/keycloak/data/export:rw
+    cpus: 0.5
+    mem_limit: "512M"
     depends_on:
       - sso-db
   jaeger:
@@ -60,6 +70,8 @@ services:
     ports:
       - "16686:16686"
       - "14250:14250"
+    cpus: 0.5
+    mem_limit: "100M"
   otel-collector:
     image: otel/opentelemetry-collector:latest
     command: ["--config=/etc/otel-collector-config.yaml"]
@@ -67,5 +79,17 @@ services:
       - ./otel/otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
     ports:
       - "4317:4317"
+    cpus: 0.5
+    mem_limit: "100M"
     depends_on:
       - jaeger
+  prometheus:
+    image: prom/prometheus:v2.30.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/:/etc/prometheus/:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    cpus: 0.5
+    mem_limit: "100M"

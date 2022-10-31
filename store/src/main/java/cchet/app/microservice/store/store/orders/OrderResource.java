@@ -1,6 +1,8 @@
 package cchet.app.microservice.store.store.orders;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.RequestScoped;
@@ -16,6 +18,8 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 import cchet.app.microservice.store.store.global.MenuItem;
 import cchet.app.microservice.store.store.orders.application.OrderCommandHandler;
 import cchet.app.microservice.store.store.orders.application.OrderQuery;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tag;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.extension.annotations.WithSpan;
 import io.quarkus.oidc.IdToken;
@@ -39,6 +43,9 @@ public class OrderResource {
     OrderCommandHandler orderCommand;
 
     @Inject
+    MeterRegistry meterRegistry;
+
+    @Inject
     Template orders;
 
     @GET
@@ -51,6 +58,9 @@ public class OrderResource {
                 .sorted(Map.Entry.comparingByKey())
                 .map(e -> new OrdersUI(e.getKey(), e.getValue()))
                 .collect(Collectors.toList());
+                meterRegistry.counter("page_viewed",
+                        List.of(Tag.of("user", principal.getName()), Tag.of("page", MenuItem.ORDERS.name())))
+                        .increment();
         return orders.data("menuItem", MenuItem.ORDERS)
                 .data("orderList", orderList)
                 .data("username", principal.getName());
@@ -61,8 +71,14 @@ public class OrderResource {
     @WithSpan(kind = SpanKind.SERVER)
     public TemplateInstance action(@FormParam("orderId") String orderId, @FormParam("action") String action) {
         switch (action) {
-            case "fulfill" -> orderCommand.fulfill(orderId);
-            case "cancel" -> orderCommand.cancel(orderId);
+            case "fulfill" -> {
+                orderCommand.fulfill(orderId);
+                meterRegistry.counter("order_fulfilled", List.of(Tag.of("user", principal.getName()))).increment();
+            }
+            case "cancel" -> {
+                orderCommand.cancel(orderId);
+                meterRegistry.counter("orders_canceled", List.of(Tag.of("user", principal.getName()))).increment();
+            }
             default -> throw new WebApplicationException("Action not supported. action: " + action);
         }
 

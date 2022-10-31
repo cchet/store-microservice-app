@@ -52,7 +52,8 @@ This project requires the following tools to be available on your machine.
 * Maven 3.x.x
 * quarkus-cli
 * openssl
-* Docker/Docker-Compose
+* Docker 19.03.0+
+* Docker-Compose v3.8
 * An IDE of your choice
 
 For Kubernetes you need
@@ -130,6 +131,8 @@ link:https://localhost:8445/q/swagger-ui[https://localhost:8445/q/swagger-ui]
 link:https://localhost:9443[https://localhost:9443]
 . `jaeger (Display tracing data)` +
 link:http://localhost:16686/search[http://localhost:16686/search]
+. `prometheus (Display metrics data)` +
+link:http://localhost:9090[http://localhost:9090]
 
 The services deployed to Kubernetes can be accessed via:
 
