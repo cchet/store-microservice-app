@@ -51,7 +51,7 @@ public class ProductResource {
     @GET
     @Path("/")
     @WithSpan(kind = SpanKind.SERVER)
-    @Timed(value = "page_timed", extraTags = {"page", "PRODUCTS", "http-method", "get"})
+    @Timed(value = "page_timed", extraTags = { "page", "PRODUCTS", "http-method", "get" })
     public TemplateInstance products() {
         var productList = productQuery.list().stream()
                 .collect(Collectors.groupingBy(p -> p.type()))
@@ -70,9 +70,12 @@ public class ProductResource {
     @POST
     @Path("/")
     @WithSpan(kind = SpanKind.SERVER)
-    @Timed(value = "page_timed", extraTags = {"page", "PRODUCTS", "http-method", "post"})
     public TemplateInstance get(@FormParam("productId") @NotEmpty String productId) {
-        basketCommandHandler.addProduct(productId);
-        return products();
+        return meterRegistry.timer("action_timed", List.of(Tag.of("page", MenuItem.ORDERS.name()),
+                Tag.of("action", "addProduct")))
+                .record(() -> {
+                    basketCommandHandler.addProduct(productId);
+                    return products();
+                });
     }
 }

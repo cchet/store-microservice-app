@@ -2,7 +2,6 @@ package cchet.app.microservice.store.store.orders;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.RequestScoped;
@@ -52,7 +51,7 @@ public class OrderResource {
     @GET
     @Path("/")
     @WithSpan(kind = SpanKind.SERVER)
-    @Timed(value = "page_timed", extraTags = {"page", "ORDERS", "http-method", "get"})
+    @Timed(value = "page_timed", extraTags = { "page", "ORDERS", "http-method", "get" })
     public TemplateInstance orders() {
         final var orderList = orderQuery.list().stream()
                 .collect(Collectors.groupingBy(o -> o.state()))
@@ -60,9 +59,9 @@ public class OrderResource {
                 .sorted(Map.Entry.comparingByKey())
                 .map(e -> new OrdersUI(e.getKey(), e.getValue()))
                 .collect(Collectors.toList());
-                meterRegistry.counter("page_viewed",
-                        List.of(Tag.of("user", principal.getName()), Tag.of("page", MenuItem.ORDERS.name())))
-                        .increment();
+        meterRegistry.counter("page_viewed",
+                List.of(Tag.of("user", principal.getName()), Tag.of("page", MenuItem.ORDERS.name())))
+                .increment();
         return orders.data("menuItem", MenuItem.ORDERS)
                 .data("orderList", orderList)
                 .data("username", principal.getName());
@@ -71,20 +70,26 @@ public class OrderResource {
     @POST
     @Path("/")
     @WithSpan(kind = SpanKind.SERVER)
-    @Timed(value = "page_timed", extraTags = {"page", "ORDERS", "http-method", "post"})
     public TemplateInstance action(@FormParam("orderId") String orderId, @FormParam("action") String action) {
+        var timer = meterRegistry.timer("action_timed", List.of(Tag.of("page", MenuItem.ORDERS.name()),
+                Tag.of("action", action)));
         switch (action) {
             case "fulfill" -> {
-                orderCommand.fulfill(orderId);
-                meterRegistry.counter("order_fulfilled", List.of(Tag.of("user", principal.getName()))).increment();
+                return timer.record(() -> {
+                    orderCommand.fulfill(orderId);
+                    meterRegistry.counter("order_fulfilled", List.of(Tag.of("user", principal.getName()))).increment();
+                    return orders();
+                });
             }
             case "cancel" -> {
-                orderCommand.cancel(orderId);
-                meterRegistry.counter("orders_canceled", List.of(Tag.of("user", principal.getName()))).increment();
+                return timer.record(() -> {
+                    orderCommand.cancel(orderId);
+                    meterRegistry.counter("orders_canceled", List.of(Tag.of("user", principal.getName()))).increment();
+                    return orders();
+                });
             }
             default -> throw new WebApplicationException("Action not supported. action: " + action);
         }
 
-        return orders();
     }
 }

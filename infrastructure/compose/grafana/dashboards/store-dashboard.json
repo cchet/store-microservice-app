@@ -281,7 +281,7 @@
                     "uid": "PBFA97CFB590B2093"
                 },
                 "editorMode": "builder",
-                "expr": "avg by(page) (page_timed_seconds_max{http_method=\"post\"})",
+                "expr": "avg by(page, action) (action_timed_seconds_max)",
                 "legendFormat": "__auto",
                 "range": true,
                 "refId": "A"
@@ -735,6 +735,6 @@
     "timezone": "",
     "title": "Store Dashboard",
     "uid": "k0xp0QH4k",
-    "version": 1,
+    "version": 2,
     "weekStart": ""
 }

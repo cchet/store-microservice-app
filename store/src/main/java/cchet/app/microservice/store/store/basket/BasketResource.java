@@ -56,7 +56,7 @@ public class BasketResource {
     @GET
     @Path("/")
     @WithSpan(kind = SpanKind.SERVER)
-    @Timed(value = "page_timed", extraTags = {"page", "BASKET", "http-method", "get"})
+    @Timed(value = "page_timed", extraTags = { "page", "BASKET", "http-method", "get" })
     public TemplateInstance get() {
         var userBasket = basketQuery.findForLoggedUserOrNew();
         var productIds = userBasket.items.stream().map(i -> i.productId).collect(Collectors.toList());
@@ -81,18 +81,32 @@ public class BasketResource {
     @POST
     @Path("/")
     @WithSpan(kind = SpanKind.SERVER)
-    @Timed(value = "page_timed", extraTags = {"page", "BASKET", "http-method", "post"})
     public TemplateInstance action(@FormParam("productId") String productId, @FormParam("action") String action) {
+        var timer = meterRegistry.timer("action_timed", List.of(Tag.of("page", MenuItem.BASKET.name()),
+                Tag.of("action", action)));
         switch (action) {
-            case "removeItem" -> basketCommandHandler.removeItem(productId);
-            case "remove" -> basketCommandHandler.remove(productId);
-            case "placeOrder" -> {
-                basketCommandHandler.placeOrder();
-                meterRegistry.counter("orders_placed", List.of(Tag.of("user", principal.getName())))
-                        .increment();
+            case "removeItem" -> {
+                return timer.record(() -> {
+                    basketCommandHandler.removeItem(productId);
+                    return get();
+                });
             }
-            default -> throw new WebApplicationException("Action not supported. action: " + action);
+            case "remove" -> {
+                return timer.record(() -> {
+                    basketCommandHandler.remove(productId);
+                    return get();
+                });
+            }
+            case "placeOrder" -> {
+                return timer.record(() -> {
+                    basketCommandHandler.placeOrder();
+                    meterRegistry.counter("orders_placed", List.of(Tag.of("user", principal.getName())))
+                            .increment();
+                    return get();
+                });
+            }
+            default ->
+                throw new WebApplicationException("Action not supported. action: " + action);
         }
-        return get();
     }
 }
