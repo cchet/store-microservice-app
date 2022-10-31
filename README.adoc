@@ -133,6 +133,8 @@ link:https://localhost:9443[https://localhost:9443]
 link:http://localhost:16686/search[http://localhost:16686/search]
 . `prometheus (Display metrics data)` +
 link:http://localhost:9090[http://localhost:9090]
+. `grafana (Display metrics data in dashboards, credentials: admin/admin)` +
+link:http://localhost:13000[http://localhost:13000]
 
 The services deployed to Kubernetes can be accessed via:
 
