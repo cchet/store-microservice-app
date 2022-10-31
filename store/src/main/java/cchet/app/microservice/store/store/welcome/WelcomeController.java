@@ -20,7 +20,6 @@ import io.quarkus.oidc.IdToken;
 import io.quarkus.qute.Template;
 import io.quarkus.qute.TemplateInstance;
 
-@RequestScoped
 @Path("/")
 public class WelcomeController {
 

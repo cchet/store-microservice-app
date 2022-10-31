@@ -6,8 +6,6 @@ import java.util.stream.Collectors;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.Consumes;
@@ -18,13 +16,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
-import org.jboss.resteasy.reactive.RestResponse;
-import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 
-import cchet.app.microservice.store.warehouse.error.ErrorJson;
 import cchet.app.microservice.store.warehouse.products.application.ProductCommandHandler;
 import cchet.app.microservice.store.warehouse.products.application.ProductQuery;
 import cchet.app.microservice.store.warehouse.products.application.Type;
@@ -102,14 +96,5 @@ public class ProductResource {
         return commandHandler.push(id, count)
                 .map(ProductJson::new)
                 .orElseThrow(() -> new NotFoundException("No Product found for id=" + id));
-    }
-
-    @ServerExceptionMapper
-    RestResponse<ErrorJson> mapException(ConstraintViolationException e) {
-        var errors = e.getConstraintViolations().stream()
-                .map(ConstraintViolation::getMessage)
-                .collect(Collectors.toList());
-        final ErrorJson errorModel = new ErrorJson("Contraints violated", Map.of("Violations", errors));
-        return RestResponse.status(Response.Status.BAD_REQUEST, errorModel);
     }
 }

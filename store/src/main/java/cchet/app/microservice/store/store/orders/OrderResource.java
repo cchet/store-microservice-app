@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.RequestScoped;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -22,18 +22,16 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.extension.annotations.WithSpan;
-import io.quarkus.oidc.IdToken;
 import io.quarkus.qute.Template;
 import io.quarkus.qute.TemplateInstance;
 import io.quarkus.security.Authenticated;
 
-@RequestScoped
+@ApplicationScoped
 @Path("/secured/orders")
 @Authenticated
 public class OrderResource {
 
     @Inject
-    @IdToken
     JsonWebToken principal;
 
     @Inject

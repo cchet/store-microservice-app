@@ -4,6 +4,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.FormParam;
@@ -29,13 +30,12 @@ import io.quarkus.qute.Template;
 import io.quarkus.qute.TemplateInstance;
 import io.quarkus.security.Authenticated;
 
-@RequestScoped
+@ApplicationScoped
 @Path("/secured/basket")
 @Authenticated
 public class BasketResource {
 
     @Inject
-    @IdToken
     JsonWebToken principal;
 
     @Inject

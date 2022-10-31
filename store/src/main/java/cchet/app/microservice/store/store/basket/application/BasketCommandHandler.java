@@ -18,14 +18,14 @@ import io.opentelemetry.extension.annotations.WithSpan;
 public class BasketCommandHandler {
 
     @Inject
-    JsonWebToken token;
+    JsonWebToken principal;
 
     @Inject
     OrderCommandHandler orderCommandHandler;
 
     @WithSpan(kind = SpanKind.INTERNAL)
     public void placeOrder() {
-        var basket = Basket.<Basket>findByIdOptional(token.getName()).orElse(null);
+        var basket = Basket.<Basket>findByIdOptional(principal.getName()).orElse(null);
         var orderItems = basket.items.stream().map(i -> new OrderItem(i.productId, i.count, null))
                 .collect(Collectors.toList());
         orderCommandHandler.place(orderItems);
@@ -34,23 +34,23 @@ public class BasketCommandHandler {
 
     @WithSpan(kind = SpanKind.INTERNAL)
     public Basket removeItem(String productId) {
-        final var basket = Basket.<Basket>findByIdOptional(token.getName())
-                .orElseThrow(() -> new IllegalArgumentException("No basket for user '" + token.getName() + "' found"));
+        final var basket = Basket.<Basket>findByIdOptional(principal.getName())
+                .orElseThrow(() -> new IllegalArgumentException("No basket for user '" + principal.getName() + "' found"));
         basket.removeProductItem(productId);
         return basket;
     }
 
     @WithSpan(kind = SpanKind.INTERNAL)
     public Basket remove(String productId) {
-        final var basket = Basket.<Basket>findByIdOptional(token.getName())
-                .orElseThrow(() -> new IllegalArgumentException("No basket for user '" + token.getName() + "' found"));
+        final var basket = Basket.<Basket>findByIdOptional(principal.getName())
+                .orElseThrow(() -> new IllegalArgumentException("No basket for user '" + principal.getName() + "' found"));
         basket.removeProduct(productId);
         return basket;
     }
 
     @WithSpan(kind = SpanKind.INTERNAL)
     public Basket addProduct(String productId) {
-        final var basket = Basket.<Basket>findByIdOptional(token.getName()).orElse(Basket.newForUser(token.getName()));
+        final var basket = Basket.<Basket>findByIdOptional(principal.getName()).orElse(Basket.newForUser(principal.getName()));
 
         if (!basket.isPersistent()) {
             basket.addItem(BasketItem.newItem(productId, 1));

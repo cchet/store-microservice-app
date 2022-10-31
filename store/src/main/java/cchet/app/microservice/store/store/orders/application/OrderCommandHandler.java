@@ -6,8 +6,6 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.eclipse.microprofile.jwt.Claim;
-import org.eclipse.microprofile.jwt.Claims;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import cchet.app.microservice.store.store.orders.client.ItemJson;
@@ -17,10 +15,6 @@ import io.opentelemetry.extension.annotations.WithSpan;
 
 @ApplicationScoped
 public class OrderCommandHandler {
-
-    @Inject
-    @Claim(standard = Claims.upn)
-    String username;
 
     @Inject
     @RestClient

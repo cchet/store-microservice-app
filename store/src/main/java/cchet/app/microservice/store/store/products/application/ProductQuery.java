@@ -33,7 +33,7 @@ public class ProductQuery {
                 .map(this::toProduct)
                 .collect(Collectors.toList());
     }
-    
+
     private Product toProduct(final ProductJson productJson) {
         return new Product(productJson.id, productJson.name, productJson.type, productJson.count, productJson.price,
                 productJson.taxPercent);
