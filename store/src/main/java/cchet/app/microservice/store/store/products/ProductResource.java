@@ -17,6 +17,7 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 import cchet.app.microservice.store.store.basket.application.BasketCommandHandler;
 import cchet.app.microservice.store.store.global.MenuItem;
 import cchet.app.microservice.store.store.products.application.ProductQuery;
+import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import io.opentelemetry.api.trace.SpanKind;
@@ -50,6 +51,7 @@ public class ProductResource {
     @GET
     @Path("/")
     @WithSpan(kind = SpanKind.SERVER)
+    @Timed(value = "page_timed", extraTags = {"page", "PRODUCTS", "http-method", "get"})
     public TemplateInstance products() {
         var productList = productQuery.list().stream()
                 .collect(Collectors.groupingBy(p -> p.type()))
@@ -68,6 +70,7 @@ public class ProductResource {
     @POST
     @Path("/")
     @WithSpan(kind = SpanKind.SERVER)
+    @Timed(value = "page_timed", extraTags = {"page", "PRODUCTS", "http-method", "post"})
     public TemplateInstance get(@FormParam("productId") @NotEmpty String productId) {
         basketCommandHandler.addProduct(productId);
         return products();

@@ -19,6 +19,7 @@ import cchet.app.microservice.store.store.basket.application.BasketQuery;
 import cchet.app.microservice.store.store.global.MenuItem;
 import cchet.app.microservice.store.store.products.application.Product;
 import cchet.app.microservice.store.store.products.application.ProductQuery;
+import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import io.opentelemetry.api.trace.SpanKind;
@@ -55,6 +56,7 @@ public class BasketResource {
     @GET
     @Path("/")
     @WithSpan(kind = SpanKind.SERVER)
+    @Timed(value = "page_timed", extraTags = {"page", "BASKET", "http-method", "get"})
     public TemplateInstance get() {
         var userBasket = basketQuery.findForLoggedUserOrNew();
         var productIds = userBasket.items.stream().map(i -> i.productId).collect(Collectors.toList());
@@ -79,6 +81,7 @@ public class BasketResource {
     @POST
     @Path("/")
     @WithSpan(kind = SpanKind.SERVER)
+    @Timed(value = "page_timed", extraTags = {"page", "BASKET", "http-method", "post"})
     public TemplateInstance action(@FormParam("productId") String productId, @FormParam("action") String action) {
         switch (action) {
             case "removeItem" -> basketCommandHandler.removeItem(productId);

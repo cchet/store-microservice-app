@@ -18,6 +18,7 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 import cchet.app.microservice.store.store.global.MenuItem;
 import cchet.app.microservice.store.store.orders.application.OrderCommandHandler;
 import cchet.app.microservice.store.store.orders.application.OrderQuery;
+import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import io.opentelemetry.api.trace.SpanKind;
@@ -51,6 +52,7 @@ public class OrderResource {
     @GET
     @Path("/")
     @WithSpan(kind = SpanKind.SERVER)
+    @Timed(value = "page_timed", extraTags = {"page", "ORDERS", "http-method", "get"})
     public TemplateInstance orders() {
         final var orderList = orderQuery.list().stream()
                 .collect(Collectors.groupingBy(o -> o.state()))
@@ -69,6 +71,7 @@ public class OrderResource {
     @POST
     @Path("/")
     @WithSpan(kind = SpanKind.SERVER)
+    @Timed(value = "page_timed", extraTags = {"page", "ORDERS", "http-method", "post"})
     public TemplateInstance action(@FormParam("orderId") String orderId, @FormParam("action") String action) {
         switch (action) {
             case "fulfill" -> {

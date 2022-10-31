@@ -11,6 +11,7 @@ import javax.ws.rs.Path;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import cchet.app.microservice.store.store.global.MenuItem;
+import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import io.opentelemetry.api.trace.SpanKind;
@@ -35,6 +36,7 @@ public class WelcomeController {
 
     @GET
     @WithSpan(kind = SpanKind.SERVER)
+    @Timed(value = "page_timed", extraTags = {"page", "WELCOME", "http-method", "get"})
     public TemplateInstance store() {
         meterRegistry.counter("page_viewed",
                 List.of(Tag.of("user", Optional.ofNullable(principal.getName()).orElse("anonymus")), Tag.of("page", MenuItem.WELCOME.name())))
