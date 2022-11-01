@@ -22,7 +22,6 @@
     "editable": true,
     "fiscalYearStartMonth": 0,
     "graphTooltip": 0,
-    "id": 2,
     "links": [],
     "liveNow": false,
     "panels": [{
@@ -487,6 +486,6 @@
     "timezone": "",
     "title": "Services Dashboard",
     "uid": "joD549HVk",
-    "version": 2,
+    "version": 1,
     "weekStart": ""
 }
