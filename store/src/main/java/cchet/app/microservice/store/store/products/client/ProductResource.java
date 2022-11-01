@@ -31,7 +31,7 @@ import io.quarkus.oidc.token.propagation.JsonWebTokenRequestFilter;
 @RegisterClientHeaders(ClientHeaderFactory.class)
 @Path("/product")
 @Timeout(value = 2, unit = ChronoUnit.SECONDS)
-@Retry(maxRetries = 3, delay = 100)
+@Retry(maxRetries = 3, delay = 500)
 public interface ProductResource {
 
     @GET

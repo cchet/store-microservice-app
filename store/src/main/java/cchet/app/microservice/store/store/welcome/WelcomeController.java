@@ -3,7 +3,6 @@ package cchet.app.microservice.store.store.welcome;
 import java.util.List;
 import java.util.Optional;
 
-import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -11,6 +10,7 @@ import javax.ws.rs.Path;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import cchet.app.microservice.store.store.global.MenuItem;
+import cchet.app.microservice.store.store.global.StoreConfiguration;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
@@ -33,6 +33,9 @@ public class WelcomeController {
     @Inject
     MeterRegistry meterRegistry;
 
+    @Inject
+    StoreConfiguration storeConfiguration;
+
     @GET
     @WithSpan(kind = SpanKind.SERVER)
     @Timed(value = "page_timed", extraTags = {"page", "WELCOME", "http-method", "get"})
@@ -42,6 +45,8 @@ public class WelcomeController {
                 .increment();
 
         return welcome.data("menuItem", MenuItem.WELCOME)
-                .data("username", principal.getName());
+                .data("username", principal.getName())
+                .data("welcomeTitleLogged", storeConfiguration.welcomeTitleLogged())
+                .data("welcomeTitleNotLogged", storeConfiguration.welcomeTitleNotLogged());
     }
 }

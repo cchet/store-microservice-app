@@ -98,7 +98,7 @@ services:
     image: grafana/grafana:9.2.2
     environment:
       GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: 'admin'
+      GF_SECURITY_ADMIN_PASSWORD: 'admin@123!'
     ports:
       - "13000:3000"
     volumes:

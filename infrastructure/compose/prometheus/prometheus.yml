@@ -34,3 +34,35 @@ scrape_configs:
     static_configs:
       - targets:
           - 'host.docker.internal:8443'
+
+  - job_name: 'order'
+
+    # Override the global default and scrape targets from this job every 5 seconds.
+    scrape_interval: 5s
+
+    metrics_path: /q/metrics
+
+    scheme: https
+
+    tls_config:
+      insecure_skip_verify: true
+      
+    static_configs:
+      - targets:
+          - 'host.docker.internal:8444'
+          
+  - job_name: 'warehouse'
+
+    # Override the global default and scrape targets from this job every 5 seconds.
+    scrape_interval: 5s
+
+    metrics_path: /q/metrics
+
+    scheme: https
+
+    tls_config:
+      insecure_skip_verify: true
+      
+    static_configs:
+      - targets:
+          - 'host.docker.internal:8445'

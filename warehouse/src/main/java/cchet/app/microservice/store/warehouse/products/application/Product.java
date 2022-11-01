@@ -35,7 +35,6 @@ public class Product extends PanacheEntityBase {
 
     @NotNull
     @Min(value = 0, message = "{product.count.min}")
-    @Max(value = 20, message = "{product.count.max}")
     public int count;
 
     @NotNull

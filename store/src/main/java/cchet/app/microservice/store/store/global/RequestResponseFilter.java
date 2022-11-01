@@ -31,8 +31,11 @@ public class RequestResponseFilter implements ContainerRequestFilter, ContainerR
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
             throws IOException {
-        var timeInMillis = System.currentTimeMillis() - (Long) requestContext.getProperty("startInMillis");
-        log.info("Endpoint '{} {}' called by '{}' took '{}' millis", requestContext.getMethod(), requestContext.getUriInfo().getPath(),
+        var nowInMillis = System.currentTimeMillis();
+        var startInMillis = Optional.ofNullable((Long) requestContext.getProperty("startInMillis")).orElse(nowInMillis);
+        var timeInMillis = nowInMillis - startInMillis;
+        log.info("Endpoint '{} {}' called by '{}' took '{}' millis", requestContext.getMethod(),
+                requestContext.getUriInfo().getPath(),
                 Optional.ofNullable(token).map(JsonWebToken::getName).orElse("anonymus"), timeInMillis);
     }
 }
