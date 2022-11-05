@@ -22,8 +22,9 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+import io.quarkus.hibernate.reactive.panache.PanacheEntityBase;
 import io.quarkus.panache.common.Sort;
+import io.smallrye.mutiny.Uni;
 
 @Table(name = "Orders")
 @Entity
@@ -61,12 +62,12 @@ public class Order extends PanacheEntityBase {
         return order;
     }
 
-    public static List<Order> listPlacedOrFulfilledForUser(final String user) {
+    public static Uni<List<Order>> listPlacedOrFulfilledForUser(final String user) {
         return find("username = :username and state != :state", Sort.descending("updatedDate", "id"), Map.of("username", user, "state", OrderState.CANCELED)).list();
     }
 
-    public static Optional<Order> findPlacedOrderForId(final String id) {
-        return find("id = :id and state = :state", Map.of("id", id, "state", OrderState.PLACED)).firstResultOptional();
+    public static Uni<Order> findPlacedOrderForId(final String id) {
+        return find("id = :id and state = :state", Map.of("id", id, "state", OrderState.PLACED)).firstResult();
     }
 
     public BigDecimal fullPrice() {

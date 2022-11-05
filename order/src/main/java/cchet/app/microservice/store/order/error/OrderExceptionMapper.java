@@ -7,14 +7,13 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
 
-@Provider
-public class OrderExceptionMapper implements ExceptionMapper<OrderException> {
+import org.jboss.resteasy.reactive.server.ServerExceptionMapper;
 
-    @Override
-    public Response toResponse(OrderException exception) {
+public class OrderExceptionMapper {
+
+    @ServerExceptionMapper
+    public Response orderExceptionToResponse(OrderException exception) {
         List<String> outOfStockItems = exception.outOfStockItems.stream().map(i -> i.productId)
                 .collect(Collectors.toList());
         List<String> notExistingItems = exception.notExistingItems.stream().map(i -> i.productId)

@@ -4,20 +4,18 @@ import java.io.IOException;
 import java.util.Optional;
 
 import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ContainerResponseContext;
-import javax.ws.rs.container.ContainerResponseFilter;
-import javax.ws.rs.ext.Provider;
 
+import org.jboss.resteasy.reactive.server.ServerRequestFilter;
+import org.jboss.resteasy.reactive.server.ServerResponseFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Provider
-public class RequestResponseFilter implements ContainerRequestFilter, ContainerResponseFilter {
+public class RequestResponseFilter {
 
     private static final Logger log = LoggerFactory.getLogger(RequestResponseFilter.class);
 
-    @Override
+    @ServerResponseFilter
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
             throws IOException {
         var nowInMillis = System.currentTimeMillis();
@@ -31,7 +29,7 @@ public class RequestResponseFilter implements ContainerRequestFilter, ContainerR
 
     }
 
-    @Override
+    @ServerRequestFilter
     public void filter(ContainerRequestContext requestContext) throws IOException {
         requestContext.setProperty("startTimeInMillis", System.currentTimeMillis());
     }

@@ -11,6 +11,7 @@ import org.eclipse.microprofile.jwt.Claims;
 
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.extension.annotations.WithSpan;
+import io.smallrye.mutiny.Uni;
 
 @ApplicationScoped
 @Transactional
@@ -21,7 +22,7 @@ public class OrderQuery {
     String username;
 
     @WithSpan(kind = SpanKind.INTERNAL)
-    public List<Order> list(){
+    public Uni<List<Order>> list(){
         return Order.listPlacedOrFulfilledForUser(username);
     }
 }

@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.transaction.Transactional;
 
 import org.eclipse.microprofile.jwt.Claim;
 import org.eclipse.microprofile.jwt.Claims;
@@ -21,18 +20,20 @@ import cchet.app.microservice.store.order.error.OrderException;
 import cchet.app.microservice.store.order.global.TaxCalculator;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.extension.annotations.WithSpan;
+import io.quarkus.hibernate.reactive.panache.common.runtime.ReactiveTransactional;
+import io.smallrye.mutiny.Uni;
 
 @ApplicationScoped
-@Transactional
+@ReactiveTransactional
 public class OrderCommandHandler {
 
     private record ResolvedItems(List<Item> items, List<Item> notExistingItems, List<Item> outOfStockItems) {
     }
 
     @Inject
-    @Claim(standard =  Claims.upn)
-    String username; 
-    
+    @Claim(standard = Claims.upn)
+    String username;
+
     @Inject
     TaxCalculator taxCalculator;
 
@@ -41,68 +42,80 @@ public class OrderCommandHandler {
     ProductResource productClient;
 
     @WithSpan(kind = SpanKind.INTERNAL)
-    public Order placeOrder(final List<Item> items) {
-        final var resolvedItems = resolveInvalidAndFillValidOrderItems(items);
-
-        if (!resolvedItems.notExistingItems.isEmpty() || !resolvedItems.outOfStockItems.isEmpty()) {
-            throw new OrderException("Canot place order",
-                    resolvedItems.outOfStockItems,
-                    resolvedItems.notExistingItems);
-        }
-
-        // Username should come from the security context!!
-        final Order order = Order.placedOrder(username, items);
-        order.persist();
-        return order;
+    public Uni<Order> placeOrder(final List<Item> items) {
+        return Order.placedOrder(username, items).<Order>persist()
+                .onItem()
+                .call(order -> resolveInvalidAndFillValidOrderItems(items).onItem().transform(resolvedItems -> {
+                    if (!resolvedItems.notExistingItems.isEmpty() || !resolvedItems.outOfStockItems.isEmpty()) {
+                        return Uni.createFrom().failure(new OrderException("Canot place order",
+                                resolvedItems.outOfStockItems,
+                                resolvedItems.notExistingItems));
+                    }
+                    return Uni.createFrom().item(order);
+                }));
     }
 
     @WithSpan(kind = SpanKind.INTERNAL)
-    public Order fulfill(final String id) {
-        final var order = Order.findPlacedOrderForId(id).orElseThrow(() -> new OrderException("Order not found"));
-        final var resolvedItems = resolveInvalidAndFillValidOrderItems(order.items);
-        if (!resolvedItems.notExistingItems.isEmpty() || !resolvedItems.outOfStockItems.isEmpty()) {
-            throw new OrderException("Canot fulfill order",
-                    resolvedItems.outOfStockItems,
-                    resolvedItems.notExistingItems);
-        }
-
-        order.fulfill();
-        var idtoCount = order.items.stream().collect(Collectors.toMap(i -> i.productId, i -> i.count));
-        productClient.pull(idtoCount);
-
-        return order;
+    public Uni<Order> fulfill(final String id) {
+        return Order.findPlacedOrderForId(id).onItem().call(order -> {
+            if (order == null) {
+                return Uni.createFrom().failure(new OrderException("Order not found"));
+            }
+            return Uni.createFrom().item(order);
+        }).onItem()
+                .call(order -> resolveInvalidAndFillValidOrderItems(order.items)
+                        .onItem().transform(resolvedItems -> {
+                            if (!resolvedItems.notExistingItems.isEmpty() || !resolvedItems.outOfStockItems.isEmpty()) {
+                                return Uni.createFrom().failure(new OrderException("Canot fulfill order",
+                                        resolvedItems.outOfStockItems,
+                                        resolvedItems.notExistingItems));
+                            }
+                            return Uni.createFrom().item(order);
+                        }))
+                .onItem().call(order -> {
+                    order.fulfill();
+                    var idtoCount = order.items.stream().collect(Collectors.toMap(i -> i.productId, i -> i.count));
+                    productClient.pull(idtoCount);
+                    return Uni.createFrom().item(order);
+                });
     }
 
     @WithSpan(kind = SpanKind.INTERNAL)
-    public Order cancel(final String id) {
-        final var order = Order.findPlacedOrderForId(id).orElseThrow(() -> new OrderException("Order not found"));
-        order.cancel();
-        return order;
+    public Uni<Order> cancel(final String id) {
+        return Order.findPlacedOrderForId(id).call(order -> {
+            if (order == null) {
+                return Uni.createFrom().failure(new OrderException("Order not found"));
+            }
+            return Uni.createFrom().item(order);
+        }).onItem().call(order -> {
+            order.cancel();
+            return Uni.createFrom().item(order);
+        });
     }
 
-    private ResolvedItems resolveInvalidAndFillValidOrderItems(final List<Item> items) {
+    private Uni<ResolvedItems> resolveInvalidAndFillValidOrderItems(final List<Item> items) {
         final var idToItem = items.stream()
                 .collect(Collectors.toMap(i -> i.productId, Function.identity()));
-        final var products = productClient.findByIds(new ArrayList<>(idToItem.keySet()));
-        final var productIdToProduct = products.stream()
-                .collect(Collectors.toMap(p -> p.id, Function.identity()));
-        final List<Item> notExistingItems = new LinkedList<>();
-        final List<Item> outOfStockItems = new LinkedList<>();
-        for (var entry : productIdToProduct.entrySet()) {
-            var product = entry.getValue();
-            var item = idToItem.get(entry.getKey());
-            if (item != null) {
-                if ((product.count - item.count) >= 0) {
-                    calculateAndSetPrices(item, product);
+        return productClient.findByIds(new ArrayList<>(idToItem.keySet())).onItem().transform((products) -> {
+            final var productIdToProduct = products.stream()
+                    .collect(Collectors.toMap(p -> p.id, Function.identity()));
+            final List<Item> notExistingItems = new LinkedList<>();
+            final List<Item> outOfStockItems = new LinkedList<>();
+            for (var entry : productIdToProduct.entrySet()) {
+                var product = entry.getValue();
+                var item = idToItem.get(entry.getKey());
+                if (item != null) {
+                    if ((product.count - item.count) >= 0) {
+                        calculateAndSetPrices(item, product);
+                    } else {
+                        outOfStockItems.add(item);
+                    }
                 } else {
-                    outOfStockItems.add(item);
+                    notExistingItems.add(item);
                 }
-            } else {
-                notExistingItems.add(item);
             }
-        }
-
-        return new ResolvedItems(items, notExistingItems, outOfStockItems);
+            return new ResolvedItems(items, notExistingItems, outOfStockItems);
+        });
     }
 
     private void calculateAndSetPrices(final Item item, final Product product) {
