@@ -11,12 +11,11 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+import io.quarkus.hibernate.reactive.panache.PanacheEntityBase;
 
 @Entity
 @Table(uniqueConstraints = {
@@ -38,8 +37,8 @@ public class Product extends PanacheEntityBase {
     public int count;
 
     @NotNull
-    @DecimalMin(value="0.01", message = "{product.price.decimalMin}")
-    @DecimalMax(value="1000000.00", message = "{product.price.decimalMax}")
+    @DecimalMin(value = "0.01", message = "{product.price.decimalMin}")
+    @DecimalMax(value = "1000000.00", message = "{product.price.decimalMax}")
     public BigDecimal price;
 
     @NotNull

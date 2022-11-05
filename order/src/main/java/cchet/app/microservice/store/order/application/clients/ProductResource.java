@@ -45,5 +45,5 @@ public interface ProductResource {
     @Path("/pull")
     @Produces(MediaType.APPLICATION_JSON)
     @WithSpan(kind = SpanKind.CLIENT)
-    public Product pull(@NotEmpty final Map<String, Integer> idWIthCount);
+    public List<Product> pull(@NotEmpty final Map<String, Integer> idWIthCount);
 }

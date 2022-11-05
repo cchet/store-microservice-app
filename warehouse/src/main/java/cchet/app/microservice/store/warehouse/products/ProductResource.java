@@ -19,6 +19,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 
+import cchet.app.microservice.store.warehouse.products.application.Product;
 import cchet.app.microservice.store.warehouse.products.application.ProductCommandHandler;
 import cchet.app.microservice.store.warehouse.products.application.ProductQuery;
 import cchet.app.microservice.store.warehouse.products.application.Type;
@@ -26,6 +27,7 @@ import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.extension.annotations.WithSpan;
 import io.quarkus.security.Authenticated;
 import io.smallrye.common.constraint.NotNull;
+import io.smallrye.mutiny.Uni;
 
 @RequestScoped
 @Path("/product")
@@ -43,18 +45,18 @@ public class ProductResource {
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
     @WithSpan(kind = SpanKind.SERVER)
-    public List<ProductJson> list() {
-        return query.list().stream().map(ProductJson::new).collect(Collectors.toList());
+    public Uni<List<ProductJson>> list() {
+        return query.list().onItem().transform(this::transfromProductToProductJson);
     }
 
     @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @WithSpan(kind = SpanKind.SERVER)
-    public ProductJson find(@NotEmpty @PathParam("id") final String id) {
+    public Uni<ProductJson> find(@NotEmpty @PathParam("id") final String id) {
         return query.findById(id)
-                .map(ProductJson::new)
-                .orElseThrow(() -> new NotFoundException("No Product found for id=" + id));
+                .onFailure().transform(e -> new NotFoundException("No Product found for id=" + id, e))
+                .onItem().transform(ProductJson::new);
     }
 
     @POST
@@ -62,39 +64,42 @@ public class ProductResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @WithSpan(kind = SpanKind.SERVER)
-    public List<ProductJson> findByIds(@NotEmpty final List<String> ids) {
+    public Uni<List<ProductJson>> findByIds(@NotEmpty final List<String> ids) {
         return query.findByIds(ids)
-                .stream()
-                .map(ProductJson::new)
-                .collect(Collectors.toList());
+                .onItem().transform(this::transfromProductToProductJson);
     }
 
     @GET
     @Path("/search/type/{type}")
     @Produces(MediaType.APPLICATION_JSON)
     @WithSpan(kind = SpanKind.SERVER)
-    public List<ProductJson> findForType(@PathParam("type") @NotNull final Type type) {
-        return query.findByType(type).stream()
-                .map(ProductJson::new)
-                .collect(Collectors.toList());
+    public Uni<List<ProductJson>> findForType(@PathParam("type") @NotNull final Type type) {
+        return query.findByType(type)
+                .onItem().transform(this::transfromProductToProductJson);
     }
 
     @POST
     @Path("/pull")
     @Produces(MediaType.APPLICATION_JSON)
     @WithSpan(kind = SpanKind.SERVER)
-    public void pull(@NotEmpty final Map<String, Integer> idWIthCount) {
-        commandHandler.pull(idWIthCount);
+    public Uni<List<ProductJson>> pull(@NotEmpty final Map<String, Integer> idWIthCount) {
+        return commandHandler.pull(idWIthCount)
+                .onFailure(IllegalStateException.class).transform(e -> new NotFoundException("No entries found", e))
+                .onItem().transform(this::transfromProductToProductJson);
     }
 
     @POST
     @Path("/push/{id}/{count}")
     @Produces(MediaType.APPLICATION_JSON)
     @WithSpan(kind = SpanKind.SERVER)
-    public ProductJson push(@NotEmpty @PathParam("id") final String id,
+    public Uni<ProductJson> push(@NotEmpty @PathParam("id") final String id,
             @NotNull @Min(1) @PathParam("count") final Integer count) {
         return commandHandler.push(id, count)
-                .map(ProductJson::new)
-                .orElseThrow(() -> new NotFoundException("No Product found for id=" + id));
+                .onFailure().transform(e -> new NotFoundException("No Product found for id=" + id, e))
+                .onItem().transform(ProductJson::new);
+    }
+
+    private List<ProductJson> transfromProductToProductJson(final List<Product> produts) {
+        return produts.stream().map(ProductJson::new).collect(Collectors.toList());
     }
 }
